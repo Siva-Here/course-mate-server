@@ -3,7 +3,7 @@ const Document = require('../model/Document');
 const Comment = require('../model/Comment');
 const Folder = require('../model/Folder');
 
-// Get Documents by Folder
+
 const getDocumentsByFolder = async (req, res) => {
     const { folderId } = req.params;
 
@@ -16,7 +16,7 @@ const getDocumentsByFolder = async (req, res) => {
     }
 };
 
-// Get Document by ID
+
 const getDocumentById = async (req, res) => {
     const { docId } = req.params;
 
@@ -32,7 +32,7 @@ const getDocumentById = async (req, res) => {
     }
 };
 
-// Update Document
+
 const updateDocument = async (req, res) => {
     const { id } = req.params;
     const { name, rscLink } = req.body;
@@ -54,7 +54,7 @@ const updateDocument = async (req, res) => {
     }
 };
 
-// Delete Document
+
 const deleteDocument = async (req, res) => {
     const { id } = req.params;
 
@@ -78,7 +78,7 @@ const deleteDocument = async (req, res) => {
     }
 };
 
-// Comment on Document
+
 const commentOnDocument = async (req, res) => {
     const { id } = req.params;
     const { comment, userEmail } = req.body;
