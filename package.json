@@ -1,0 +1,33 @@
+{
+  "name": "coursemate-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TVNLCHARAN/coursemate-server.git"
+  },
+  "author": "Tvnl Charan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TVNLCHARAN/coursemate-server/issues"
+  },
+  "homepage": "https://github.com/TVNLCHARAN/coursemate-server#readme",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "mongoose": "^8.4.0",
+    "nodemon": "^3.1.0",
+    "passport": "^0.7.0"
+  }
+}
