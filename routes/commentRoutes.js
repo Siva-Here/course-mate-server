@@ -1,5 +1,5 @@
 const express = require("express");
-const { getComments, deleteComment } = require("./commentController");
+const { getComments, deleteComment } = require("../controllers/commentController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 
