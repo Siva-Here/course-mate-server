@@ -40,6 +40,7 @@ const uploadDoc = async (req, res) => {
 }
 
 const createFolder = async (req, res) => {
+    console.log(req.body);
     const { name, parentFolderName } = req.body;
 
     try {

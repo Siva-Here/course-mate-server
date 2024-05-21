@@ -5,27 +5,27 @@ const {
   renameFolder,
   deleteFolder,
   getDocs,
-  getFolderById, 
-  getSubfolders, 
-  updateFolder
+  getFolderById,
+  getSubfolders,
+  updateFolder,
 } = require("../controllers/folderController");
 
-const auth = require("../middlewares/auth");
-const authAdmin = require("../middlewares/authAdmin");
+// const auth = require("../middlewares/auth");
+// const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.post("/uploadDoc", authAdmin, uploadDoc);
-router.get("/getDocs/:folderId", authAdmin, getDocs);
+router.post("/uploadDoc", uploadDoc);
+router.get("/getDocs/:folderId", getDocs);
 
-router.post("/createFolder", authAdmin, createFolder);
-router.put("/renameFolder", authAdmin, renameFolder);
-router.delete("/deleteFolder/:folderId", authAdmin, deleteFolder);
+router.post("/createFolder", createFolder);
+router.put("/renameFolder", renameFolder);
+router.delete("/deleteFolder/:folderId", deleteFolder);
 
-router.get('/:id', auth, getFolderById);
+router.get("/:id", getFolderById);
 
-router.get('/:id/subfolders', auth, getSubfolders);
+router.get("/:id/subfolders", getSubfolders);
 
-router.put('/:id', authAdmin, updateFolder);
+router.put("/:id", updateFolder);
 
 module.exports = router;
