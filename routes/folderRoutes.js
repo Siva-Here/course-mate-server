@@ -20,11 +20,11 @@ router.get("/getDocs/:folderId", getDocs);
 
 router.post("/createFolder", createFolder);
 router.put("/renameFolder", renameFolder);
-router.delete("/deleteFolder/:folderId", deleteFolder);
+router.delete("/deleteFolder", deleteFolder);
 
-router.get("/:id", getFolderById);
+router.get("/", getFolderById);
 
-router.get("/:id/subfolders", getSubfolders);
+router.get("/subfolders", getSubfolders);
 
 router.put("/:id", updateFolder);
 

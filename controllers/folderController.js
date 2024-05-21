@@ -1,5 +1,3 @@
-
-const mongoose = require('mongoose');
 const Folder = require('../model/Folder');
 const Document = require('../model/Document');
 const User = require('../model/User');
@@ -42,32 +40,37 @@ const uploadDoc = async (req, res) => {
 const createFolder = async (req, res) => {
     console.log(req.body);
     const { name, parentFolderName } = req.body;
-
-    try {
-        let parentFolder = null;
-        if (parentFolderName) {
-            parentFolder = await Folder.findOne({ name: parentFolderName });
-
-            if (!parentFolder) {
-                return res.status(404).json({ message: 'Parent folder not found' });
+    const exists = await Folder.find({"name": name});
+    console.log(exists);
+    if(exists.length!=0){
+        return res.status(409).json({message: "Folder already exists"});
+    }else{
+        try {
+            let parentFolder = null;
+            if (parentFolderName) {
+                parentFolder = await Folder.findOne({ name: parentFolderName });
+    
+                if (!parentFolder) {
+                    return res.status(404).json({ message: 'Parent folder not found' });
+                }
             }
+            const newFolder = new Folder({
+                name: name,
+                parentFolder: parentFolder ? parentFolder._id : null,
+                subfolders: [],
+                contents: []
+            });
+            const savedFolder = await newFolder.save();
+            if (parentFolder) {
+                parentFolder.subfolders.push(savedFolder._id);
+                await parentFolder.save();
+            }
+            res.status(201).json(savedFolder);
+    
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Server error' });
         }
-        const newFolder = new Folder({
-            name: name,
-            parentFolder: parentFolder ? parentFolder._id : null,
-            subfolders: [],
-            contents: []
-        });
-        const savedFolder = await newFolder.save();
-        if (parentFolder) {
-            parentFolder.subfolders.push(savedFolder._id);
-            await parentFolder.save();
-        }
-        res.status(201).json(savedFolder);
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
     }
 };
 
@@ -124,7 +127,7 @@ const getDocs = async (req, res) => {
 
 
 const deleteFolder = async (req, res) => {
-    const { folderId } = req.params;
+    const { folderId } = req.body;
 
     try {
         const folder = await Folder.findById(folderId);
@@ -150,10 +153,10 @@ const deleteFolder = async (req, res) => {
 };
 
 const getFolderById = async (req, res) => {
-    const { id } = req.params;
+    const { folderId } = req.body;
 
     try {
-        const folder = await Folder.findById(id);
+        const folder = await Folder.findById(folderId);
         if (!folder) {
             return res.status(404).json({ message: 'Folder not found' });
         }
@@ -165,10 +168,10 @@ const getFolderById = async (req, res) => {
 };
 
 const getSubfolders = async (req, res) => {
-    const { id } = req.params;
+    const { folderId } = req.body;
 
     try {
-        const folder = await Folder.findById(id).populate('subfolders');
+        const folder = await Folder.findById(folderId).populate('subfolders');
         if (!folder) {
             return res.status(404).json({ message: 'Folder not found' });
         }
