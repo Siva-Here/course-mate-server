@@ -1,13 +1,14 @@
 const express = require('express');
 const { getDocumentsByFolder, getDocumentById, updateDocument, deleteDocument, commentOnDocument } = require('./documentController');
-const { authMiddleware, authAdminMiddleware } = require('./authMiddleware');
+const auth = require('../middlewares/auth');
+const authAdmin = require('../middlewares/adminAuth');
 
 const router = express.Router();
 
-router.get('/folder/:folderId', authMiddleware, getDocumentsByFolder);
-router.get('/:docId', authMiddleware, getDocumentById);
-router.put('/:id', authAdminMiddleware, updateDocument);
-router.delete('/:id', authAdminMiddleware, deleteDocument);
-router.post('/comment/:id', authMiddleware, commentOnDocument);
+router.get('/folder/:folderId', auth, getDocumentsByFolder);
+router.get('/:docId', auth, getDocumentById);
+router.put('/:id', authAdmin, updateDocument);
+router.delete('/:id', authAdmin, deleteDocument);
+router.post('/comment/:id', auth, commentOnDocument);
 
 module.exports = router;

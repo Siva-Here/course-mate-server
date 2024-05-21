@@ -1,14 +1,15 @@
 const express = require('express');
 const { uploadDoc, createFolder, renameFolder, deleteFolder, getDocs } = require('./yourControllerFile');
-const { authMiddleware, authAdminMiddleware } = require('./yourAuthMiddlewareFile');
+const auth = require('../middlewares/auth');
+const authAdmin = require('../middlewares/adminAuth');
 
 const router = express.Router();
 
-router.post('/uploadDoc', authMiddleware, uploadDoc);
-router.get('/getDocs/:folderId', authMiddleware, getDocs);
+router.post('/uploadDoc', authAdmin, uploadDoc);
+router.get('/getDocs/:folderId', authAdmin, getDocs);
 
-router.post('/createFolder', authAdminMiddleware, createFolder);
-router.put('/renameFolder', authAdminMiddleware, renameFolder);
-router.delete('/deleteFolder/:folderId', authAdminMiddleware, deleteFolder);
+router.post('/createFolder', authAdmin, createFolder);
+router.put('/renameFolder', authAdmin, renameFolder);
+router.delete('/deleteFolder/:folderId', authAdmin, deleteFolder);
 
 module.exports = router;
