@@ -1,5 +1,4 @@
-// HELLO
-// GAJLA
+
 const mongoose = require('mongoose');
 const Folder = require('../model/Folder');
 const Document = require('../model/Document');
@@ -23,7 +22,7 @@ const uploadDoc = async (req, res) => {
             avgRating: 0,  
             uploadedBy: user._id,
             rscLink: docLink
-        });        
+        });
         const savedDocument = await newDocument.save();
        
         folder.contents.push(savedDocument._id);
@@ -149,4 +148,51 @@ const deleteFolder = async (req, res) => {
     }
 };
 
-module.exports = { uploadDoc, createFolder, renameFolder, deleteFolder, getDocs };
+const getFolderById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const folder = await Folder.findById(id);
+        if (!folder) {
+            return res.status(404).json({ message: 'Folder not found' });
+        }
+        res.status(200).json(folder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const getSubfolders = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const folder = await Folder.findById(id).populate('subfolders');
+        if (!folder) {
+            return res.status(404).json({ message: 'Folder not found' });
+        }
+        res.status(200).json(folder.subfolders);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const updateFolder = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    try {
+        const updatedFolder = await Folder.findByIdAndUpdate(id, updates, { new: true });
+        if (!updatedFolder) {
+            return res.status(404).json({ message: 'Folder not found' });
+        }
+        res.status(200).json(updatedFolder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
+module.exports = { uploadDoc, createFolder, renameFolder, deleteFolder, getDocs, getFolderById, getSubfolders, updateFolder };
