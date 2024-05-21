@@ -4,9 +4,15 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const app=express();
 dotenv.config();
 
-const app = express();
+app.use("/folder",require("../routes/folderRoutes"));
+app.use("/document",require("../routes/documentRoutes"));
+app.use("/comment",require("../routes/commentRoutes"));
+// app.use("/contribution",require("../routes/contributionRoutes"));
+app.use("/resource",require("../routes/resourceRoutes"));
+app.use("/user",require("../routes/userRoutes"));
 
 app.use(cors());
 app.use(bodyParser.json());

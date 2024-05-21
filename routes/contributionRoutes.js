@@ -1,5 +1,5 @@
 const express = require('express');
-const { createContribution, getContribution, updateContribution, deleteContribution, getUserContributions, getDocumentContributions } = require('./contributionController');
+const { createContribution, getContribution, updateContribution, deleteContribution, getUserContributions, getDocumentContributions } = require('../controllers/contributionController');
 
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");

@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const Folder = require('../model/Folder');
 const Document = require('../model/Document');
-const User = require('../models/User');
+const User = require('../model/User');
 
 const uploadDoc = async (req, res) => {
     const { folderName, docLink, docName, userEmail } = req.body;

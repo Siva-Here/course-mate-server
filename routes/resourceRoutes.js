@@ -6,12 +6,11 @@ const {
   deleteResource,
   getResourcesByFolder,
   getResourcesByUser,
-} = require("./resourceController");
+} = require("../controllers/resourceController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
-
 router.post("/create", auth, createResource);
 router.get("/:id", auth, getResourceById);
 router.put("/:id", authAdmin, updateResource);

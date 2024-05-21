@@ -8,7 +8,7 @@ const {
   getFolderById, 
   getSubfolders, 
   updateFolder
-} = require("./yourControllerFile");
+} = require("../controllers/folderController");
 
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");

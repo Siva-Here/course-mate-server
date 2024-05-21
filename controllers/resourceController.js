@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Resource = require('../model/Resource');
 const Folder = require('../model/Folder');
-const User = require('../models/User');
+const User = require('../model/User');
 
 
 const createResource = async (req, res) => {

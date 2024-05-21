@@ -5,7 +5,7 @@ const {
   updateDocument,
   deleteDocument,
   commentOnDocument,
-} = require("./documentController");
+} = require("../controllers/documentController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 
