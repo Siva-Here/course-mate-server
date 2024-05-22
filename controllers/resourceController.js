@@ -7,7 +7,7 @@ const createResource = async (req, res) => {
     const { name, description, rscLink, folderId, userId } = req.body;
 
     try {
-        const user = await User.findById({ userId });
+        const user = await User.findById( userId );
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -35,10 +35,10 @@ const createResource = async (req, res) => {
 
 
 const getResourceById = async (req, res) => {
-    const { id } = req.body;
+    const { rscId } = req.body;
 
     try {
-        const resource = await Resource.findById(id);
+        const resource = await Resource.findById(rscId);
         if (!resource) {
             return res.status(404).json({ message: 'Resource not found' });
         }
@@ -51,10 +51,10 @@ const getResourceById = async (req, res) => {
 
 
 const updateResource = async (req, res) => {
-    const { id, name, description, rscLink } = req.body;
+    const { rscId, name, description, rscLink } = req.body;
 
     try {
-        const resource = await Resource.findById(id);
+        const resource = await Resource.findById(rscId);
         if (!resource) {
             return res.status(404).json({ message: 'Resource not found' });
         }
@@ -73,15 +73,15 @@ const updateResource = async (req, res) => {
 
 
 const deleteResource = async (req, res) => {
-    const { id } = req.body;
+    const { rscId } = req.body;
 
     try {
-        const resource = await Resource.findById(id);
+        const resource = await Resource.findById(rscId);
         if (!resource) {
             return res.status(404).json({ message: 'Resource not found' });
         }
 
-        await Resource.findByIdAndDelete(id);
+        await Resource.findByIdAndDelete(rscId);
         res.status(200).json({ message: 'Resource deleted successfully' });
     } catch (error) {
         console.error(error);
