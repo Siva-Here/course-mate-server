@@ -39,43 +39,49 @@ const uploadDoc = async (req, res) => {
 
 const createFolder = async (req, res) => {
     const { name, parentFolderName } = req.body;
-    let exists = await Folder.find({name});
-    let id = await Folder.findOne({name: parentFolderName});
-    console.log(id);
-    exists = exists.filter((folder)=>{
-        folder.parentFolder == parentFolderName
-    });
-    if(exists.length!=0){
-        return res.status(409).json({message: "Folder already exists"});
-    }else{
-        try {
-            let parentFolder = null;
-            if (parentFolderName) {
-                parentFolder = await Folder.findOne({ name: parentFolderName });
-    
-                if (!parentFolder) {
-                    return res.status(404).json({ message: 'Parent folder not found' });
-                }
+
+    try {
+        let parentFolder = null;
+
+        if (parentFolderName) {
+            parentFolder = await Folder.findOne({ name: parentFolderName });
+
+            if (!parentFolder) {
+                return res.status(404).json({ message: 'Parent folder not found' });
             }
-            const newFolder = new Folder({
-                name: name,
-                parentFolder: parentFolder ? parentFolder._id : null,
-                subfolders: [],
-                contents: []
-            });
-            const savedFolder = await newFolder.save();
-            if (parentFolder) {
-                parentFolder.subfolders.push(savedFolder._id);
-                await parentFolder.save();
-            }
-            res.status(201).json(savedFolder);
-    
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Server error' });
         }
+        let exists = await Folder.find({ name: name });
+        console.log(exists);
+        if (parentFolder) {
+            exists = exists.filter(folder => folder.parentFolder && folder.parentFolder.toString() === parentFolder._id.toString());
+        } else {
+            exists = exists.filter(folder => !folder.parentFolder);
+        }
+        console.log(exists);
+        if (exists.length > 0) {
+            return res.status(409).json({ message: 'Folder already exists' });
+        }
+        const newFolder = new Folder({
+            name: name,
+            parentFolder: parentFolder ? parentFolder._id : null,
+            subfolders: [],
+            contents: []
+        });
+
+        const savedFolder = await newFolder.save();
+        if (parentFolder) {
+            parentFolder.subfolders.push(savedFolder._id);
+            await parentFolder.save();
+        }
+
+        res.status(201).json(savedFolder);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 const renameFolder = async (req, res) => {
     const { folderId, newName } = req.body;
