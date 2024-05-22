@@ -3,10 +3,10 @@ const Document = require('../model/Document');
 const User = require('../model/User');
 
 const uploadDoc = async (req, res) => {
-    const { folderName, docLink, docName, userEmail } = req.body;
+    const { folderId, docLink, docName, userEmail } = req.body;
 
     try {
-        const folder = await Folder.findOne({ name: folderName });
+        const folder = await Folder.findById(folderId);
         if (!folder) {
             return res.status(404).json({ message: 'Folder not found' });
         }
@@ -35,7 +35,8 @@ const uploadDoc = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
-}
+};
+
 
 const createFolder = async (req, res) => {
     const { name, parentFolderName } = req.body;
