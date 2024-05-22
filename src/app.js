@@ -1,4 +1,4 @@
-require('../db/conn');
+const startDB=require('../db/conn');
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -17,6 +17,11 @@ app.use("/resource",require("../routes/resourceRoutes"));
 app.use("/user",require("../routes/userRoutes"));
 
 
+
+startDB().then(()=>{
+  start();
+})
+
 const start = async () => {
   try {
     app.listen(process.env.PORT, () => { 
@@ -26,5 +31,3 @@ const start = async () => {
     console.log(err); 
   }
 };
-
-start();
