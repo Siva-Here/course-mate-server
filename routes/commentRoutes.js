@@ -5,7 +5,7 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.get("/comments/:docId", auth, getComments);
-router.delete("/comments/:commentId", authAdmin, deleteComment);
+router.get("/comments/:docId", getComments);
+router.delete("/comments/:commentId", deleteComment);
 
 module.exports = router;
