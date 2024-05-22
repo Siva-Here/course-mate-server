@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const Resource = require('../model/Resource');
 const Folder = require('../model/Folder');
 const User = require('../model/User');
@@ -36,7 +35,7 @@ const createResource = async (req, res) => {
 
 
 const getResourceById = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.body;
 
     try {
         const resource = await Resource.findById(id);
@@ -52,8 +51,7 @@ const getResourceById = async (req, res) => {
 
 
 const updateResource = async (req, res) => {
-    const { id } = req.params;
-    const { name, description, rscLink } = req.body;
+    const { id, name, description, rscLink } = req.body;
 
     try {
         const resource = await Resource.findById(id);
@@ -75,7 +73,7 @@ const updateResource = async (req, res) => {
 
 
 const deleteResource = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.body;
 
     try {
         const resource = await Resource.findById(id);
@@ -93,7 +91,7 @@ const deleteResource = async (req, res) => {
 
 
 const getResourcesByFolder = async (req, res) => {
-    const { folderId } = req.params;
+    const { folderId } = req.body;
 
     try {
         const resources = await Resource.find({ parentFolder: folderId });
@@ -106,7 +104,7 @@ const getResourcesByFolder = async (req, res) => {
 
 
 const getResourcesByUser = async (req, res) => {
-    const { userId } = req.params;
+    const { userId } = req.body;
 
     try {
         const resources = await Resource.find({ uploadedBy: userId });
