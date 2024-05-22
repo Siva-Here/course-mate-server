@@ -38,10 +38,12 @@ const uploadDoc = async (req, res) => {
 }
 
 const createFolder = async (req, res) => {
-    console.log(req.body);
     const { name, parentFolderName } = req.body;
-    const exists = await Folder.find({"name": name});
+    let exists = await Folder.find({name});
     console.log(exists);
+    exists = exists.filter((folder)=>{
+        folder.parentFolder == parentFolderName
+    });
     if(exists.length!=0){
         return res.status(409).json({message: "Folder already exists"});
     }else{
