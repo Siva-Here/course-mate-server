@@ -9,9 +9,9 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
-router.get("/docs", auth, getUserDocs);
-router.get("/profile", auth, getUserProfile);
-router.put("/profile", auth, updateUserProfile);
-router.delete("/", authAdmin, deleteUser);
+router.get("/docs", getUserDocs);
+router.get("/profile", getUserProfile);
+router.put("/profile", updateUserProfile);
+router.delete("/", deleteUser);
 
 module.exports = router;
