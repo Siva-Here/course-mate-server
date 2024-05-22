@@ -11,10 +11,10 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.get("/folder", getDocumentsByFolder);
-router.get("/", getDocumentById);
-router.put("/", updateDocument);
-router.delete("/", deleteDocument);
-router.post("/comment", commentOnDocument);
+router.get("/folder",auth, getDocumentsByFolder);
+router.get("/",auth, getDocumentById);
+router.put("/",authAdmin,updateDocument);
+router.delete("/",authAdmin, deleteDocument);
+router.post("/comment",authAdmin, commentOnDocument);
 
 module.exports = router;

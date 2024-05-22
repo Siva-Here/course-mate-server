@@ -11,11 +11,11 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
-router.post("/create", createResource);
-router.get("/", getResourceById);
-router.put("/", updateResource);
-router.delete("/", deleteResource);
-router.get("/folder", getResourcesByFolder);
-router.get("/user", getResourcesByUser);
+router.post("/create",auth, createResource);
+router.get("/",auth, getResourceById);
+router.put("/", auth,updateResource);
+router.delete("/", authAdmin,deleteResource);
+router.get("/folder", auth,getResourcesByFolder);
+router.get("/user", auth,getResourcesByUser);
 
 module.exports = router;
