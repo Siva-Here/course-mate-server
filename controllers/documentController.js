@@ -5,7 +5,7 @@ const Folder = require('../model/Folder');
 
 
 const getDocumentsByFolder = async (req, res) => {
-    const { folderId } = req.params;
+    const { folderId } = req.body;
 
     try {
         const documents = await Document.find({ parentFolder: folderId });

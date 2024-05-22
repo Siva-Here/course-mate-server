@@ -11,7 +11,7 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.get("/folder/:folderId", auth, getDocumentsByFolder);
+router.get("/folder", auth, getDocumentsByFolder);
 router.get("/:docId", auth, getDocumentById);
 router.put("/:id", authAdmin, updateDocument);
 router.delete("/:id", authAdmin, deleteDocument);
