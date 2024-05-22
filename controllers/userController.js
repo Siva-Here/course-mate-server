@@ -1,55 +1,8 @@
-const mongoose = require('mongoose');
 const User = require('../model/User');
 const Document = require('../model/Document');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-
-const registerUser = async (req, res) => {
-    const { username, email, password } = req.body;
-
-    try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            username,
-            email,
-            password: hashedPassword,
-        });
-
-        const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
-const loginUser = async (req, res) => {
-    const { email, password } = req.body;
-
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-            expiresIn: '1h',
-        });
-
-        res.status(200).json({ token, userId: user._id });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
 
 const getUserProfile = async (req, res) => {
-    const { userId } = req.params;
+    const { userId } = req.body;
 
     try {
         const user = await User.findById(userId);
@@ -65,7 +18,7 @@ const getUserProfile = async (req, res) => {
 };
 
 const updateUserProfile = async (req, res) => {
-    const { userId } = req.params;
+    const { userId } = req.body;
     const updates = req.body;
 
     try {
@@ -85,7 +38,7 @@ const updateUserProfile = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-    const { userId } = req.params;
+    const { userId } = req.body;
 
     try {
         const user = await User.findByIdAndDelete(userId);
@@ -103,7 +56,7 @@ const deleteUser = async (req, res) => {
 
 
 const getUserDocs = async (req, res) => {
-    const { email } = req.params;
+    const { email } = req.body;
 
     try {
         const user = await User.findOne({ email });

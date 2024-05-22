@@ -1,8 +1,6 @@
 const express = require("express");
 const {
   getUserDocs,
-  registerUser,
-  loginUser,
   getUserProfile,
   updateUserProfile,
   deleteUser,
@@ -11,11 +9,9 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
-router.get("/docs/:email", auth, getUserDocs);
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.get("/profile/:userId", auth, getUserProfile);
-router.put("/profile/:userId", auth, updateUserProfile);
-router.delete("/:userId", authAdmin, deleteUser);
+router.get("/docs", auth, getUserDocs);
+router.get("/profile", auth, getUserProfile);
+router.put("/profile", auth, updateUserProfile);
+router.delete("/", authAdmin, deleteUser);
 
 module.exports = router;
