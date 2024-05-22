@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Comment = require('../model/Comment');
 
 const getComments = async (req, res) => {
-    const { docId } = req.params;
+    const { docId } = req.body;
 
     try {
         const comments = await Comment.find({ commentedDocId: docId });
@@ -17,7 +17,7 @@ const getComments = async (req, res) => {
 };
 
 const deleteComment = async (req, res) => {
-    const { commentId } = req.params;
+    const { commentId } = req.body;
 
     try {
         const comment = await Comment.findById(commentId);
