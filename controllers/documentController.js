@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const User = require('../model/User');
 const Document = require('../model/Document');
 const Comment = require('../model/Comment');
 const Folder = require('../model/Folder');
@@ -34,10 +34,10 @@ const getDocumentById = async (req, res) => {
 
 
 const updateDocument = async (req, res) => {
-    const { id, name, rscLink } = req.body;
+    const { docId, name, rscLink } = req.body;
 
     try {
-        const document = await Document.findById(id);
+        const document = await Document.findById(docId);
         if (!document) {
             return res.status(404).json({ message: 'Document not found' });
         }
@@ -55,10 +55,10 @@ const updateDocument = async (req, res) => {
 
 
 const deleteDocument = async (req, res) => {
-    const { id } = req.body;
+    const { docId } = req.body;
 
     try {
-        const document = await Document.findById(id);
+        const document = await Document.findById(docId);
         if (!document) {
             return res.status(404).json({ message: 'Document not found' });
         }
@@ -79,10 +79,10 @@ const deleteDocument = async (req, res) => {
 
 
 const commentOnDocument = async (req, res) => {
-    const { id, comment, userEmail } = req.body;
+    const { docId, comment, userEmail } = req.body;
 
     try {
-        const document = await Document.findById(id);
+        const document = await Document.findById(docId);
         if (!document) {
             return res.status(404).json({ message: 'Document not found' });
         }

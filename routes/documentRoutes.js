@@ -15,6 +15,6 @@ router.get("/folder", getDocumentsByFolder);
 router.get("/", getDocumentById);
 router.put("/", updateDocument);
 router.delete("/", deleteDocument);
-router.post("/comment/", commentOnDocument);
+router.post("/comment", commentOnDocument);
 
 module.exports = router;
