@@ -79,7 +79,7 @@ const deleteDocument = async (req, res) => {
 
 
 const commentOnDocument = async (req, res) => {
-    const { docId, comment, userEmail } = req.body;
+    const { docId, comment, userId } = req.body;
 
     try {
         const document = await Document.findById(docId);
@@ -87,7 +87,7 @@ const commentOnDocument = async (req, res) => {
             return res.status(404).json({ message: 'Document not found' });
         }
 
-        const user = await User.findOne({ email: userEmail });
+        const user = await User.findById({ userId });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

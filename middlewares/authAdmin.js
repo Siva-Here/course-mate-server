@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
 const jwtDecode = require('jwt-decode');
-const adminEmails = ['n200232@rguktn.ac.in', 'n200086@rguktn.ac.in']; 
+require('dotenv').config();
+const adminEmails = process.env.ADMIN_EMAILS.split(',');
 
 const verifyToken = (req, res, next) => {
   const bearerHeader = req.headers['authorization'];

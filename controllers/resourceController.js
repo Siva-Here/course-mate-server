@@ -4,10 +4,10 @@ const User = require('../model/User');
 
 
 const createResource = async (req, res) => {
-    const { name, description, rscLink, folderId, userEmail } = req.body;
+    const { name, description, rscLink, folderId, userId } = req.body;
 
     try {
-        const user = await User.findOne({ email: userEmail });
+        const user = await User.findById({ userId });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

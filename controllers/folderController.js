@@ -3,14 +3,14 @@ const Document = require('../model/Document');
 const User = require('../model/User');
 
 const uploadDoc = async (req, res) => {
-    const { folderId, docLink, docName, userEmail } = req.body;
+    const { folderId, docLink, docName, userId } = req.body;
 
     try {
         const folder = await Folder.findById(folderId);
         if (!folder) {
             return res.status(404).json({ message: 'Folder not found' });
         }
-        const user = await User.findOne({ email: userEmail });
+        const user = await User.findById({ userId });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }        
@@ -110,7 +110,7 @@ const renameFolder = async (req, res) => {
 };
 
 const getDocs = async (req, res) => {
-    const { folderId } = req.params;
+    const { folderId } = req.body;
     try {
         const folder = await Folder.findById(folderId);
         if (!folder) {
@@ -193,11 +193,10 @@ const getSubfolders = async (req, res) => {
 };
 
 const updateFolder = async (req, res) => {
-    const { id } = req.params;
-    const updates = req.body;
+    const {folderId, updates} = req.body;
 
     try {
-        const updatedFolder = await Folder.findByIdAndUpdate(id, updates, { new: true });
+        const updatedFolder = await Folder.findByIdAndUpdate(folderId, updates, { new: true });
         if (!updatedFolder) {
             return res.status(404).json({ message: 'Folder not found' });
         }

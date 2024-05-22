@@ -16,7 +16,7 @@ const {
 const router = express.Router();
 
 router.post("/uploadDoc", uploadDoc);
-router.get("/getDocs/:folderId", getDocs);
+router.get("/getDocs", getDocs);
 
 router.post("/createFolder", createFolder);
 router.put("/renameFolder", renameFolder);
@@ -26,6 +26,6 @@ router.get("/", getFolderById);
 
 router.get("/subfolders", getSubfolders);
 
-router.put("/:id", updateFolder);
+router.put("/", updateFolder);
 
 module.exports = router;
