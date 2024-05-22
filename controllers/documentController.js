@@ -65,7 +65,7 @@ const deleteDocument = async (req, res) => {
         
         const parentFolder = await Folder.findById(document.parentFolder);
         if (parentFolder) {
-            parentFolder.contents = parentFolder.contents.filter(docId => docId.toString() !== id);
+            parentFolder.contents = parentFolder.contents.filter(docId => docId.toString() !== docId);
             await parentFolder.save();
         }
 
@@ -95,7 +95,7 @@ const commentOnDocument = async (req, res) => {
         const newComment = new Comment({
             comment,
             commentedBy: user._id,
-            commentedDocId: id
+            commentedDocId: docId
         });
 
         const savedComment = await newComment.save();
