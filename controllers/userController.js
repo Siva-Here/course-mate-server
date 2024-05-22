@@ -72,4 +72,4 @@ const getUserDocs = async (req, res) => {
     }
 };
 
-module.exports = { getUserDocs, registerUser, loginUser, getUserProfile, updateUserProfile, deleteUser };
+module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser };
