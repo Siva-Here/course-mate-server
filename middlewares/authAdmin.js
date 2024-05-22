@@ -1,4 +1,4 @@
-const jwtDecode = require('jwt-decode');
+const {jwtDecode} = require('jwt-decode');
 require('dotenv').config();
 const adminEmails = process.env.ADMIN_EMAILS.split(',');
 

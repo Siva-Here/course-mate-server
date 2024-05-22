@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const jwtDecode = require('jwt-decode');
+const {jwtDecode} = require('jwt-decode');
 const allowedEmails = require('../db/emails.js'); 
 
 const verifyToken = (req, res, next) => {
