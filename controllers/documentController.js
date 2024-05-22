@@ -18,7 +18,7 @@ const getDocumentsByFolder = async (req, res) => {
 
 
 const getDocumentById = async (req, res) => {
-    const { docId } = req.params;
+    const { docId } = req.body;
 
     try {
         const document = await Document.findById(docId);
@@ -34,8 +34,7 @@ const getDocumentById = async (req, res) => {
 
 
 const updateDocument = async (req, res) => {
-    const { id } = req.params;
-    const { name, rscLink } = req.body;
+    const { id, name, rscLink } = req.body;
 
     try {
         const document = await Document.findById(id);
@@ -56,7 +55,7 @@ const updateDocument = async (req, res) => {
 
 
 const deleteDocument = async (req, res) => {
-    const { id } = req.params;
+    const { id } = req.body;
 
     try {
         const document = await Document.findById(id);
@@ -80,8 +79,7 @@ const deleteDocument = async (req, res) => {
 
 
 const commentOnDocument = async (req, res) => {
-    const { id } = req.params;
-    const { comment, userEmail } = req.body;
+    const { id, comment, userEmail } = req.body;
 
     try {
         const document = await Document.findById(id);
