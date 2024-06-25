@@ -6,7 +6,11 @@ const folderSchema = new Schema({
   parentFolder: { type: Schema.Types.ObjectId, ref: 'Folder' }, 
   subfolders: [{ type: Schema.Types.ObjectId, ref: 'Folder' }], 
   contents: [{ type: Schema.Types.ObjectId, ref: 'Document' }], 
-  createdAt: { type: Date, default: Date.now } 
+  createdAt: { type: Date, default: Date.now },
+  isSubject:{
+    type:Boolean,
+    required:true
+  }
 });
 
 const Folder = mongoose.model('Folder', folderSchema);
