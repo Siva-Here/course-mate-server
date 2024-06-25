@@ -32,7 +32,6 @@ const getDocumentById = async (req, res) => {
     }
 };
 
-
 const updateDocument = async (req, res) => {
     const { docId, name, rscLink } = req.body;
 

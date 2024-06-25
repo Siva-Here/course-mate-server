@@ -3,7 +3,6 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 const app=express();
 dotenv.config();
 app.use(cors());
@@ -15,8 +14,6 @@ app.use("/comment",require("../routes/commentRoutes"));
 // app.use("/contribution",require("../routes/contributionRoutes"));
 app.use("/resource",require("../routes/resourceRoutes"));
 app.use("/user",require("../routes/userRoutes"));
-
-
 
 startDB().then(()=>{
   start();
