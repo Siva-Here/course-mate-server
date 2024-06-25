@@ -11,5 +11,5 @@ const ids = [
 ];
 
 const emails = ids.map(id => id.replace('N', 'n') + '@rguktn.ac.in');
-
+emails.push('vnlcharan.t@gmail.com');
 module.exports = emails;

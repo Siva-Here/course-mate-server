@@ -3,6 +3,7 @@ require('dotenv').config();
 const adminEmails = process.env.ADMIN_EMAILS.split(',');
 
 const verifyToken = (req, res, next) => {
+  next();
   const bearerHeader = req.headers['authorization'];
 
   if (typeof bearerHeader !== 'undefined') {

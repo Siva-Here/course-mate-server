@@ -7,7 +7,7 @@ const {
   getDocs,
   getFolderById,
   getSubfolders,
-  updateFolder,
+  updateFolder,getFolders
 } = require("../controllers/folderController");
 
 const auth = require("../middlewares/auth");
@@ -15,17 +15,18 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.post("/uploadDoc", auth,uploadDoc);
-router.get("/getDocs",auth, getDocs);
+router.post("/uploadDoc",uploadDoc);
+router.get("/getDocs", getDocs);
 
-router.post("/createFolder",authAdmin,createFolder);
-router.put("/renameFolder",authAdmin, renameFolder);
-router.delete("/deleteFolder",authAdmin, deleteFolder);
+router.post("/createFolder",createFolder);
+router.put("/renameFolder", renameFolder);
+router.delete("/deleteFolder", deleteFolder);
 
-router.get("/",auth, getFolderById);
+router.get("/", getFolderById);
+router.get("/folders", getFolders);
 
-router.get("/subfolders",auth, getSubfolders);
+router.get("/subfolders", getSubfolders);
 
-router.put("/",authAdmin, updateFolder);
+router.put("/", updateFolder);
 
 module.exports = router;

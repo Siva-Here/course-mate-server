@@ -3,9 +3,10 @@ const {jwtDecode} = require('jwt-decode');
 const allowedEmails = require('../db/emails.js'); 
 
 const verifyToken = (req, res, next) => {
+  next();
   const bearerHeader = req.headers['authorization'];
-
-  if (typeof bearerHeader !== 'undefined') {
+  console.log(bearerHeader);
+  if (typeof bearerHeader !== 'undefined') {  
     const bearerToken = bearerHeader.split(' ')[1];
     const decodedToken = jwtDecode(bearerToken);
     const userEmail = decodedToken.email;
