@@ -22,7 +22,7 @@ router.post("/createFolder",createFolder);
 router.put("/renameFolder", renameFolder);
 router.delete("/deleteFolder", deleteFolder);
 
-router.get("/", getFolderById);
+router.post("/", getFolderById);
 router.get("/folders", getFolders);
 
 router.get("/subfolders", getSubfolders);
