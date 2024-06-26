@@ -5,7 +5,6 @@ const Folder = require("../model/Folder");
 const { google } = require("googleapis");
 const path = require("path");
 const fs = require("fs");
-const express = require("express");
 const multer = require("multer");
 const { format } = require("date-fns");
 require("dotenv").config();
@@ -61,9 +60,6 @@ const upload = multer({
     fileSize: 30 * 1024 * 1024, // 30MB limit
   },
 }).single("file");
-
-// Serve uploaded files statically
-app.use("/uploads", express.static("uploads"));
 
 const getDocumentsByFolder = async (req, res) => {
   const { folderId } = req.body;
