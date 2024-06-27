@@ -133,11 +133,10 @@ const uploadDocument = (req, res) => {
       fs.unlinkSync(securePath);
 
       return res.json({
-        message: "File uploaded successfully to Google Drive.",
-        originalFilename: req.file.originalname,
+        name: req.file.originalname,
         fileId: fileId,
-        webViewLink: result.data.webViewLink,
-        webContentLink: result.data.webContentLink,
+        viewLink: result.data.webViewLink,
+        downloadLink: result.data.webContentLink,
       });
     } catch (error) {
       console.error("Error uploading to Google Drive:", error);
