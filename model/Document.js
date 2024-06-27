@@ -12,9 +12,7 @@ const documentSchema = new Schema({
     type: String, required: true
   },
   downloadLink:{
-    viewLink:{
-      type: String, required: true
-    }
+    type: String, required: true
   },
   fileId: { type: String, required:true}
 });
