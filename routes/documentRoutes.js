@@ -6,11 +6,13 @@ const {
   deleteDocument,
   uploadDocument,
   commentOnDocument,
+  saveDocument,
 } = require("../controllers/documentController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
+router.post("/saveDocument",saveDocument);
 router.post("/upload", uploadDocument);
 router.post("/folder", getDocumentsByFolder);
 router.get("/", getDocumentById);

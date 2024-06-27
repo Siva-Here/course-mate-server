@@ -72,6 +72,7 @@ const getDocumentsByFolder = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 const uploadDocument = (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -133,6 +134,7 @@ const uploadDocument = (req, res) => {
 
       return res.json({
         message: "File uploaded successfully to Google Drive.",
+        originalFilename: req.file.originalname,
         fileId: fileId,
         webViewLink: result.data.webViewLink,
         webContentLink: result.data.webContentLink,
@@ -146,6 +148,37 @@ const uploadDocument = (req, res) => {
     }
   });
 };
+
+
+const saveDocument = async (req, res) => {
+  const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
+
+  if (!fileId || !name || !viewLink || !downloadLink || !parentFolder || !uploadedBy) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  try {
+    const newDocument = new Document({
+      name,
+      parentFolder,
+      uploadedBy,
+      viewLink,
+      downloadLink,
+      fileId
+    });
+
+    const savedDocument = await newDocument.save();
+
+    return res.status(201).json({
+      message: "Document saved successfully",
+      document: savedDocument
+    });
+  } catch (error) {
+    console.error("Error saving document:", error);
+    return res.status(500).json({ error: "Failed to save the document" });
+  }
+};
+
 
 const getDocumentById = async (req, res) => {
   const { docId } = req.body;
@@ -242,4 +275,5 @@ module.exports = {
   updateDocument,
   deleteDocument,
   commentOnDocument,
+  saveDocument,
 };

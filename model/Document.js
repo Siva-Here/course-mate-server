@@ -7,7 +7,16 @@ const documentSchema = new Schema({
   avgRating: { type: Number, default: 0 },  
   uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },  
   createdAt: { type: Date, default: Date.now },
-  rscLink: {type: String, required: true}
+  rscLink: {type: String, required: false},
+  viewLink:{
+    type: String, required: true
+  },
+  downloadLink:{
+    viewLink:{
+      type: String, required: true
+    }
+  },
+  fileId: { type: String, required:true}
 });
 
 
