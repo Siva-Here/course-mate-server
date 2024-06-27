@@ -50,10 +50,16 @@ function getFileExtension(filename) {
 const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === "application/pdf") {
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Invalid file type. Only PDF files are allowed."));
+      cb(new Error("Invalid file type. Only PDF, PPT, PPTX, and DOCX files are allowed."));
     }
   },
   limits: {
@@ -99,10 +105,10 @@ const uploadDocument = (req, res) => {
         requestBody: {
           name: req.file.originalname, // Use the original filename from the upload
           parents: ["1ADy6Zj3tNL6RVeljH_mSrSPk4iJp0wQI"],
-          mimeType: "application/pdf",
+          mimeType: req.file.mimetype,
         },
         media: {
-          mimeType: "application/pdf",
+          mimeType: req.file.mimetype,
           body: fs.createReadStream(securePath),
         },
       });
@@ -148,7 +154,6 @@ const uploadDocument = (req, res) => {
   });
 };
 
-
 const saveDocument = async (req, res) => {
   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
 
@@ -177,7 +182,6 @@ const saveDocument = async (req, res) => {
     return res.status(500).json({ error: "Failed to save the document" });
   }
 };
-
 
 const getDocumentById = async (req, res) => {
   const { docId } = req.body;
@@ -231,7 +235,7 @@ const deleteDocument = async (req, res) => {
       await parentFolder.save();
     }
 
-    await Document.findByIdAndDelete(id);
+    await Document.findByIdAndDelete(docId);
     res.status(200).json({ message: "Document deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -248,7 +252,7 @@ const commentOnDocument = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    const user = await User.findById({ userId });
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
