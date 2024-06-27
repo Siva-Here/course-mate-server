@@ -1,6 +1,5 @@
 const User = require('../model/User');
 const Document = require('../model/Document');
-
 const getUserProfile = async (req, res) => {
     const { userId } = req.body;
 

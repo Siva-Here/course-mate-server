@@ -10,6 +10,10 @@ const folderSchema = new Schema({
   isSubject:{
     type:Boolean,
     required:true
+  },
+  isSem:{
+    type:Boolean,
+    required:false
   }
 });
 
