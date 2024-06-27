@@ -71,4 +71,22 @@ const getUserDocs = async (req, res) => {
     }
 };
 
-module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser };
+const getUserId = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ userId: user._id ,
+            name:user.username
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId };
