@@ -7,7 +7,10 @@ const resourceSchema = new Schema({
   rscLink: { type: String, required: true },  
   uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },  
   uploadedAt: { type: Date, default: Date.now },  
-  parentFolder: { type: Schema.Types.ObjectId, ref: 'Folder' }  
+  parentFolder: { type: Schema.Types.ObjectId, ref: 'Folder' },
+  byAdmin:{
+    type:Boolean,required:false
+  },  
 });
 
 const Resource = mongoose.model('Resource', resourceSchema);

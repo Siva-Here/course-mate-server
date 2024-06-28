@@ -1,5 +1,22 @@
 const User = require('../model/User');
 const Document = require('../model/Document');
+
+const getAllUsers=async(req,res)=>{
+    try{
+        const users=await User.find();
+        if(users.length>0){
+            res.status(200).json(users);
+        }
+        else{
+            res.status(404).json({message:"No users found"})
+        }
+    }
+    catch(error){
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+}
+
 const getUserProfile = async (req, res) => {
     const { userId } = req.body;
 
@@ -88,4 +105,4 @@ const getUserId = async (req, res) => {
     }
 };
 
-module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId };
+module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId,getAllUsers};

@@ -3,37 +3,6 @@ const Folder = require('../model/Folder');
 const User = require('../model/User');
 const mongoose = require('mongoose');
 
-// const createResource = async (req, res) => {
-//     const { name, description, rscLink, folderId, userId } = req.body;
-
-//     try {
-//         const user = await User.findById( userId );
-//         if (!user) {
-//             return res.status(404).json({ message: 'User not found' });
-//         }
-        
-//         const folder = await Folder.findById(folderId);
-//         if (!folder) {
-//             return res.status(404).json({ message: 'Folder not found' });
-//         }
-
-//         const newResource = new Resource({
-//             name,
-//             description,
-//             rscLink,
-//             uploadedBy: user._id,
-//             parentFolder: folder._id
-//         });
-
-//         const savedResource = await newResource.save();
-//         res.status(201).json(savedResource);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// };
-
-
 const createResource = async (req, res) => {
     const { name, description, rscLink, folderId, userId } = req.body;
   
@@ -53,9 +22,9 @@ const createResource = async (req, res) => {
         description,
         rscLink,
         uploadedBy: user._id,
-        parentFolder: folder._id
+        parentFolder: folder._id,
+        byAdmin: user.isAdmin
       });
-  
       const savedResource = await newResource.save();
   
       // Increment the totalUploaded count for the user
