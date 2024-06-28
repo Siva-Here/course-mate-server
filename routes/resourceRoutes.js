@@ -12,10 +12,10 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 router.post("/create", createResource);
-router.get("/", getResourceById);
+router.post("/", getResourceById);
 router.put("/",updateResource);
 router.delete("/",deleteResource);
 router.post("/folder",getResourcesByFolder);
-router.get("/user",getResourcesByUser);
+router.post("/user",getResourcesByUser);
 
 module.exports = router;
