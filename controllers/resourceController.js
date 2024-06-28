@@ -75,15 +75,28 @@ const updateResource = async (req, res) => {
     }
 };
 
-const getAllResource=async(req,res)=>{
-  try{
-    const resources= await Resource.find();
-    res.status(200).json(resources);
-  }catch(error){
+
+const getAllResource = async (req, res) => {
+  try {
+    const resources = await Resource.find();
+
+    // Iterate over each resource to replace uploadedBy with the username
+    const updatedResources = await Promise.all(
+      resources.map(async (resource) => {
+        const user = await User.findById(resource.uploadedBy).select('username');
+        return {
+          ...resource._doc,
+          uploadedBy: user ? user.username : 'Unknown'
+        };
+      })
+    );
+
+    res.status(200).json(updatedResources);
+  } catch (error) {
     console.error(error);
-    res.status(500).json({message:'Server error'});
+    res.status(500).json({ message: 'Server error' });
   }
-}
+};
 
 const deleteResource = async (req, res) => {
     const { rscId } = req.body;
