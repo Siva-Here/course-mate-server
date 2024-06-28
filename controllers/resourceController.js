@@ -75,6 +75,15 @@ const updateResource = async (req, res) => {
     }
 };
 
+const getAllResource=async(req,res)=>{
+  try{
+    const resources= await Resource.find();
+    res.status(200).json(resources);
+  }catch(error){
+    console.error(error);
+    res.status(500).json({message:'Server error'});
+  }
+}
 
 const deleteResource = async (req, res) => {
     const { rscId } = req.body;
@@ -130,4 +139,4 @@ const getResourcesByUser = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser };
+module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser,getAllResource };
