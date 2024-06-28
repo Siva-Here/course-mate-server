@@ -1,38 +1,73 @@
 const Resource = require('../model/Resource');
 const Folder = require('../model/Folder');
 const User = require('../model/User');
+const mongoose = require('mongoose');
+
+// const createResource = async (req, res) => {
+//     const { name, description, rscLink, folderId, userId } = req.body;
+
+//     try {
+//         const user = await User.findById( userId );
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+        
+//         const folder = await Folder.findById(folderId);
+//         if (!folder) {
+//             return res.status(404).json({ message: 'Folder not found' });
+//         }
+
+//         const newResource = new Resource({
+//             name,
+//             description,
+//             rscLink,
+//             uploadedBy: user._id,
+//             parentFolder: folder._id
+//         });
+
+//         const savedResource = await newResource.save();
+//         res.status(201).json(savedResource);
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Server error' });
+//     }
+// };
 
 
 const createResource = async (req, res) => {
     const { name, description, rscLink, folderId, userId } = req.body;
-
+  
     try {
-        const user = await User.findById( userId );
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        
-        const folder = await Folder.findById(folderId);
-        if (!folder) {
-            return res.status(404).json({ message: 'Folder not found' });
-        }
-
-        const newResource = new Resource({
-            name,
-            description,
-            rscLink,
-            uploadedBy: user._id,
-            parentFolder: folder._id
-        });
-
-        const savedResource = await newResource.save();
-        res.status(201).json(savedResource);
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      const folder = await Folder.findById(folderId);
+      if (!folder) {
+        return res.status(404).json({ message: 'Folder not found' });
+      }
+  
+      const newResource = new Resource({
+        name,
+        description,
+        rscLink,
+        uploadedBy: user._id,
+        parentFolder: folder._id
+      });
+  
+      const savedResource = await newResource.save();
+  
+      // Increment the totalUploaded count for the user
+      user.totalUploaded += 1;
+      await user.save();
+  
+      res.status(201).json(savedResource);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
-};
-
+  };
 
 const getResourceById = async (req, res) => {
     const { rscId } = req.body;
@@ -89,18 +124,30 @@ const deleteResource = async (req, res) => {
     }
 };
 
-
 const getResourcesByFolder = async (req, res) => {
     const { folderId } = req.body;
-
+  
     try {
-        const resources = await Resource.find({ parentFolder: folderId });
-        res.status(200).json(resources);
+      // Fetch resources by folderId
+      const resources = await Resource.find({ parentFolder: folderId });
+  
+      // Iterate over each resource to replace uploadedBy with the username
+      const updatedResources = await Promise.all(
+        resources.map(async (resource) => {
+          const user = await User.findById(resource.uploadedBy).select('username');
+          return {
+            ...resource._doc,
+            uploadedBy: user.username
+          };
+        })
+      );
+  
+      res.status(200).json(updatedResources);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
     }
-};
+  };
 
 const getResourcesByUser = async (req, res) => {
     const { userId } = req.body;
