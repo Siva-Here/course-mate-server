@@ -102,7 +102,6 @@ const getResourcesByFolder = async (req, res) => {
     }
 };
 
-
 const getResourcesByUser = async (req, res) => {
     const { userId } = req.body;
 

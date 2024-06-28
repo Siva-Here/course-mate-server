@@ -10,7 +10,6 @@ const resourceSchema = new Schema({
   parentFolder: { type: Schema.Types.ObjectId, ref: 'Folder' }  
 });
 
-
 const Resource = mongoose.model('Resource', resourceSchema);
 
 module.exports = Resource;

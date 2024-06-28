@@ -15,7 +15,7 @@ router.post("/create", createResource);
 router.get("/", getResourceById);
 router.put("/",updateResource);
 router.delete("/",deleteResource);
-router.get("/folder",getResourcesByFolder);
+router.post("/folder",getResourcesByFolder);
 router.get("/user",getResourcesByUser);
 
 module.exports = router;
