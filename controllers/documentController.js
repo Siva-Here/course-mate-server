@@ -162,6 +162,7 @@ const saveDocument = async (req, res) => {
   }
 
   try {
+    // Create and save the new document
     const newDocument = new Document({
       name,
       parentFolder,
@@ -172,6 +173,16 @@ const saveDocument = async (req, res) => {
     });
 
     const savedDocument = await newDocument.save();
+
+    // Find the user and update their totalUploaded count and uploadedDocs array
+    await User.findByIdAndUpdate(
+      uploadedBy,
+      {
+        $inc: { totalUploaded: 1 },
+        $push: { uploadedDocs: savedDocument._id }
+      },
+      { new: true } // This option returns the modified document rather than the original
+    );
 
     return res.status(201).json({
       message: "Document saved successfully",
