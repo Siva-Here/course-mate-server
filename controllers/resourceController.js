@@ -80,7 +80,6 @@ const getAllResource = async (req, res) => {
   try {
     const resources = await Resource.find();
 
-    // Iterate over each resource to replace uploadedBy with the username
     const updatedResources = await Promise.all(
       resources.map(async (resource) => {
         const user = await User.findById(resource.uploadedBy).select('username');
