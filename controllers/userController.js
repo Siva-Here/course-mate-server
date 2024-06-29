@@ -1,6 +1,16 @@
 const User = require('../model/User');
 const Document = require('../model/Document');
 
+const login=async(req,res)=>{
+    try{
+        res.status(200).json({message:"Login successfull"})
+    }
+    catch(err){
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+
+}
 const getAllUsers=async(req,res)=>{
     try{
         const users=await User.find();
@@ -105,4 +115,4 @@ const getUserId = async (req, res) => {
     }
 };
 
-module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId,getAllUsers};
+module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId,getAllUsers,login};

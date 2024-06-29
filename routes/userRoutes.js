@@ -6,11 +6,13 @@ const {
   deleteUser,
   getUserId,
   getAllUsers,
+  login,
 } = require("../controllers/userController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
+router.get("/login",auth,login)
 router.get("/users",getAllUsers)
 router.post("/getUserId",getUserId)
 router.get("/docs",getUserDocs);
