@@ -13,7 +13,7 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
-router.post("/create",auth,createUser);
+router.post("/create",createUser);
 router.get("/login",auth,login)
 router.get("/users",getAllUsers)
 router.post("/getUserId",auth,getUserId)
