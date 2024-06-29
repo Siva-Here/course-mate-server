@@ -23,7 +23,7 @@ router.put("/renameFolder",authAdmin, renameFolder);
 router.delete("/deleteFolder",authAdmin, deleteFolder);
 
 router.post("/",auth,getFolderById);
-router.get("/folders",auth,getFolders);
+router.get("/folders",getFolders);
 
 router.get("/subfolders",auth,getSubfolders);
 
