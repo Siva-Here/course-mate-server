@@ -12,12 +12,12 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
-router.get("/resources",getAllResource);
-router.post("/create", createResource);
-router.post("/", getResourceById);
-router.put("/",updateResource);
-router.delete("/",deleteResource);
-router.post("/folder",getResourcesByFolder);
-router.post("/user",getResourcesByUser);
+router.get("/resources",auth,getAllResource);
+router.post("/create",auth, createResource);
+router.post("/",auth, getResourceById);
+router.put("/",authAdmin,updateResource);
+router.delete("/",authAdmin,deleteResource);
+router.post("/folder",auth,getResourcesByFolder);
+router.post("/user",auth,getResourcesByUser);
 
 module.exports = router;

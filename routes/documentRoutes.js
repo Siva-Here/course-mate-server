@@ -12,11 +12,11 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
-router.post("/saveDocument",saveDocument);
-router.post("/upload", uploadDocument);
-router.post("/folder", getDocumentsByFolder);
-router.get("/", getDocumentById);
-router.put("/", updateDocument);
-router.delete("/", deleteDocument);
-router.post("/comment", commentOnDocument);
+router.post("/saveDocument",auth,saveDocument);
+router.post("/upload", auth,uploadDocument);
+router.post("/folder",auth, getDocumentsByFolder);
+router.get("/",auth, getDocumentById);
+router.put("/",authAdmin,updateDocument);
+router.delete("/", authAdmin,deleteDocument);
+router.post("/comment",authAdmin,commentOnDocument);
 module.exports = router;

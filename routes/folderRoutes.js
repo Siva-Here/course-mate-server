@@ -15,18 +15,18 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.post("/uploadDoc",uploadDoc);
-router.get("/getDocs", getDocs);
+router.post("/uploadDoc",auth,uploadDoc);
+router.get("/getDocs",auth, getDocs);
 
-router.post("/createFolder",createFolder);
-router.put("/renameFolder", renameFolder);
-router.delete("/deleteFolder", deleteFolder);
+router.post("/createFolder",authAdmin,createFolder);
+router.put("/renameFolder",authAdmin, renameFolder);
+router.delete("/deleteFolder",authAdmin, deleteFolder);
 
-router.post("/", getFolderById);
-router.get("/folders", getFolders);
+router.post("/",auth,getFolderById);
+router.get("/folders",auth,getFolders);
 
-router.get("/subfolders", getSubfolders);
+router.get("/subfolders",auth,getSubfolders);
 
-router.put("/", updateFolder);
+router.put("/",authAdmin,updateFolder);
 
 module.exports = router;
