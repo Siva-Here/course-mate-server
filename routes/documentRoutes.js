@@ -14,7 +14,7 @@ const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
 const router = express.Router();
 
-router.get("/docs",getDocs);
+router.get("/docs",authAdmin,getDocs);
 router.post("/accept",authAdmin,acceptDocument);
 router.post("/saveDocument",auth,saveDocument);
 router.post("/upload", auth,uploadDocument);
