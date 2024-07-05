@@ -23,7 +23,7 @@
 
 // module.exports = verifyToken;
 
-const jwtDecode = require('jwt-decode');
+const {jwtDecode} = require('jwt-decode');
 require('dotenv').config();
 const adminEmails = process.env.ADMIN_EMAILS.split(',');
 
@@ -36,10 +36,12 @@ const verifyToken = (req, res, next) => {
     try {
       decodedToken = jwtDecode(bearerToken);
     } catch (error) {
+      console.log(error);
       return res.status(400).json({ error: 'Invalid token' });
     }
 
     const userEmail = decodedToken.email;
+    console.log(userEmail, adminEmails);
     if (adminEmails.includes(userEmail)) {
       req.userEmail = userEmail;
       next();
