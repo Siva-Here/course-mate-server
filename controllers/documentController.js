@@ -63,7 +63,7 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 30 * 1024 * 1024, // 30MB limit
+    fileSize: 30 * 1024 * 1024,
   },
 }).single("file");
 
@@ -229,30 +229,40 @@ const updateDocument = async (req, res) => {
   }
 };
 
+
 const deleteDocument = async (req, res) => {
-  const { docId } = req.body;
-
-  try {
-    const document = await Document.findById(docId);
-    if (!document) {
-      return res.status(404).json({ message: "Document not found" });
+    const { docId } = req.body;
+    try {
+      const document = await Document.findById(docId);
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+  
+      const parentFolder = await Folder.findById(document.parentFolder);
+      if (parentFolder) {
+        parentFolder.contents = parentFolder.contents.filter(
+          (id) => id.toString() !== docId
+        );
+        await parentFolder.save();
+      }
+  
+      const user = await User.findById(document.uploadedBy);
+      if (user) {
+        user.totalUploaded -= 1;
+        user.uploadedDocs = user.uploadedDocs.filter(
+          (id) => id.toString() !== docId
+        );
+        await user.save();
+      }
+  
+      await Document.findByIdAndDelete(docId);
+  
+      res.status(200).json({ message: "Document deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
     }
-
-    const parentFolder = await Folder.findById(document.parentFolder);
-    if (parentFolder) {
-      parentFolder.contents = parentFolder.contents.filter(
-        (docId) => docId.toString() !== docId
-      );
-      await parentFolder.save();
-    }
-
-    await Document.findByIdAndDelete(docId);
-    res.status(200).json({ message: "Document deleted successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+  };
 
 const commentOnDocument = async (req, res) => {
   const { docId, comment, userId } = req.body;
@@ -273,7 +283,7 @@ const commentOnDocument = async (req, res) => {
       commentedBy: user._id,
       commentedDocId: docId,
     });
-
+    
     const savedComment = await newComment.save();
     res.status(201).json(savedComment);
   } catch (error) {
@@ -281,6 +291,41 @@ const commentOnDocument = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const acceptDocument = async (req, res) => {
+    const { docId } = req.body;
+  
+    try {
+      const document = await Document.findById(docId);
+      if (!document) {
+        return res.status(404).json({ message: "Document not found" });
+      }
+      
+      document.isAccepted = true;
+      await document.save();
+  
+      res.status(200).json({ message: "Document accepted successfully", isAccepted: document.isAccepted });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
+
+const getDocs=async(req,res)=>{
+  try{
+    const docs=await Document.find();
+    if(docs.length>0){
+      res.status(200).json({ docs: docs});
+    }
+    else{
+      res.status(401).json({message:"No docs found..."})
+    }
+  }
+  catch(err){
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
 
 module.exports = {
   uploadDocument,
@@ -290,4 +335,6 @@ module.exports = {
   deleteDocument,
   commentOnDocument,
   saveDocument,
+  acceptDocument,
+  getDocs,
 };

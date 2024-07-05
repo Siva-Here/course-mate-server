@@ -14,9 +14,11 @@ const documentSchema = new Schema({
   downloadLink:{
     type: String, required: true
   },
-  fileId: { type: String, required:true}
+  fileId: { type: String, required:true},
+  isAccepted:{
+    type: Boolean, required:false,default:false
+  }
 });
-
 
 const Document = mongoose.model('Document', documentSchema);
 
