@@ -17,7 +17,7 @@ const router = express.Router();
 router.get("/docs",authAdmin,getDocs);
 router.post("/accept",authAdmin,acceptDocument);
 router.post("/saveDocument",auth,saveDocument);
-router.post("/upload", auth,uploadDocument);
+router.post("/upload",auth,uploadDocument);
 router.post("/folder",auth, getDocumentsByFolder);
 router.get("/",auth, getDocumentById);
 router.put("/",authAdmin,updateDocument);

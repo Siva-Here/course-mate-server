@@ -79,13 +79,86 @@ const getDocumentsByFolder = async (req, res) => {
   }
 };
 
+// const uploadDocument = (req, res) => {
+//   upload(req, res, async (err) => {
+//     if (err) {
+//       if (err.code === "LIMIT_FILE_SIZE") {
+//         return res
+//           .status(400)
+//           .json({ error: "File is too large. Maximum size allowed is 30MB." });
+//       }
+//       return res.status(400).json({ error: err.message });
+//     }
+
+//     if (!req.file) {
+//       return res.status(400).json({ error: "No file uploaded." });
+//     }
+
+//     const uploadDir = "secure_uploads/";
+//     const securePath = path.join(uploadDir, req.file.filename);
+//     try {
+//       fs.mkdirSync(uploadDir, { recursive: true });
+//       fs.renameSync(req.file.path, securePath);
+
+//       // Upload file to Google Drive
+//       const response = await drive.files.create({
+//         requestBody: {
+//           name: req.file.originalname, // Use the original filename from the upload
+//           parents: ["1ADy6Zj3tNL6RVeljH_mSrSPk4iJp0wQI"],
+//           mimeType: req.file.mimetype,
+//         },
+//         media: {
+//           mimeType: req.file.mimetype,
+//           body: fs.createReadStream(securePath),
+//         },
+//       });
+
+//       const fileId = response.data.id;
+
+//       // Generate public URL
+//       await drive.permissions.create({
+//         fileId: fileId,
+//         requestBody: {
+//           role: "reader",
+//           type: "anyone",
+//         },
+//       });
+
+//       const result = await drive.files.get({
+//         fileId: fileId,
+//         fields: "webViewLink, webContentLink",
+//       });
+
+//       console.log({
+//         fileId: fileId,
+//         webViewLink: result.data.webViewLink,
+//         webContentLink: result.data.webContentLink,
+//       });
+
+//       // Unlink the file from secure_uploads
+//       fs.unlinkSync(securePath);
+
+//       return res.json({
+//         name: req.file.originalname,
+//         fileId: fileId,
+//         viewLink: result.data.webViewLink,
+//         downloadLink: result.data.webContentLink,
+//       });
+//     } catch (error) {
+//       console.error("Error uploading to Google Drive:", error);
+//       fs.unlinkSync(req.file.path);
+//       return res
+//         .status(500)
+//         .json({ error: "Failed to upload the file to Google Drive." });
+//     }
+//   });
+// };
+
 const uploadDocument = (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
       if (err.code === "LIMIT_FILE_SIZE") {
-        return res
-          .status(400)
-          .json({ error: "File is too large. Maximum size allowed is 30MB." });
+        return res.status(400).json({ error: "File is too large. Maximum size allowed is 30MB." });
       }
       return res.status(400).json({ error: err.message });
     }
@@ -96,6 +169,7 @@ const uploadDocument = (req, res) => {
 
     const uploadDir = "secure_uploads/";
     const securePath = path.join(uploadDir, req.file.filename);
+
     try {
       fs.mkdirSync(uploadDir, { recursive: true });
       fs.renameSync(req.file.path, securePath);
@@ -146,10 +220,13 @@ const uploadDocument = (req, res) => {
       });
     } catch (error) {
       console.error("Error uploading to Google Drive:", error);
-      fs.unlinkSync(req.file.path);
-      return res
-        .status(500)
-        .json({ error: "Failed to upload the file to Google Drive." });
+      
+      // Attempt to delete the file from the uploads directory if the upload fails
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+
+      return res.status(500).json({ error: "Failed to upload the file to Google Drive." });
     }
   });
 };
