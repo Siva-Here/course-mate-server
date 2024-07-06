@@ -79,81 +79,6 @@ const getDocumentsByFolder = async (req, res) => {
   }
 };
 
-// const uploadDocument = (req, res) => {
-//   upload(req, res, async (err) => {
-//     if (err) {
-//       if (err.code === "LIMIT_FILE_SIZE") {
-//         return res
-//           .status(400)
-//           .json({ error: "File is too large. Maximum size allowed is 30MB." });
-//       }
-//       return res.status(400).json({ error: err.message });
-//     }
-
-//     if (!req.file) {
-//       return res.status(400).json({ error: "No file uploaded." });
-//     }
-
-//     const uploadDir = "secure_uploads/";
-//     const securePath = path.join(uploadDir, req.file.filename);
-//     try {
-//       fs.mkdirSync(uploadDir, { recursive: true });
-//       fs.renameSync(req.file.path, securePath);
-
-//       // Upload file to Google Drive
-//       const response = await drive.files.create({
-//         requestBody: {
-//           name: req.file.originalname, // Use the original filename from the upload
-//           parents: ["1ADy6Zj3tNL6RVeljH_mSrSPk4iJp0wQI"],
-//           mimeType: req.file.mimetype,
-//         },
-//         media: {
-//           mimeType: req.file.mimetype,
-//           body: fs.createReadStream(securePath),
-//         },
-//       });
-
-//       const fileId = response.data.id;
-
-//       // Generate public URL
-//       await drive.permissions.create({
-//         fileId: fileId,
-//         requestBody: {
-//           role: "reader",
-//           type: "anyone",
-//         },
-//       });
-
-//       const result = await drive.files.get({
-//         fileId: fileId,
-//         fields: "webViewLink, webContentLink",
-//       });
-
-//       console.log({
-//         fileId: fileId,
-//         webViewLink: result.data.webViewLink,
-//         webContentLink: result.data.webContentLink,
-//       });
-
-//       // Unlink the file from secure_uploads
-//       fs.unlinkSync(securePath);
-
-//       return res.json({
-//         name: req.file.originalname,
-//         fileId: fileId,
-//         viewLink: result.data.webViewLink,
-//         downloadLink: result.data.webContentLink,
-//       });
-//     } catch (error) {
-//       console.error("Error uploading to Google Drive:", error);
-//       fs.unlinkSync(req.file.path);
-//       return res
-//         .status(500)
-//         .json({ error: "Failed to upload the file to Google Drive." });
-//     }
-//   });
-// };
-
 const uploadDocument = (req, res) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -231,6 +156,18 @@ const uploadDocument = (req, res) => {
   });
 };
 
+const deleteFile = async (fileId) => {
+  try {
+    const response = await drive.files.delete({
+      fileId: fileId,
+    });
+    console.log(response.data, response.status);
+  } catch (error) {
+    console.error('Error deleting file from Google Drive:', error.message);
+    throw new Error('Failed to delete file from Google Drive');
+  }
+};
+
 const saveDocument = async (req, res) => {
   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
 
@@ -306,40 +243,43 @@ const updateDocument = async (req, res) => {
   }
 };
 
-
 const deleteDocument = async (req, res) => {
-    const { docId } = req.body;
-    try {
-      const document = await Document.findById(docId);
-      if (!document) {
-        return res.status(404).json({ message: "Document not found" });
-      }
-  
-      const parentFolder = await Folder.findById(document.parentFolder);
-      if (parentFolder) {
-        parentFolder.contents = parentFolder.contents.filter(
-          (id) => id.toString() !== docId
-        );
-        await parentFolder.save();
-      }
-  
-      const user = await User.findById(document.uploadedBy);
-      if (user) {
-        user.totalUploaded -= 1;
-        user.uploadedDocs = user.uploadedDocs.filter(
-          (id) => id.toString() !== docId
-        );
-        await user.save();
-      }
-  
-      await Document.findByIdAndDelete(docId);
-  
-      res.status(200).json({ message: "Document deleted successfully" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
+  const { docId } = req.body;
+  try {
+    const document = await Document.findById(docId);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
     }
-  };
+
+    const parentFolder = await Folder.findById(document.parentFolder);
+    if (parentFolder) {
+      parentFolder.contents = parentFolder.contents.filter(
+        (id) => id.toString() !== docId
+      );
+      await parentFolder.save();
+    }
+
+    const user = await User.findById(document.uploadedBy);
+    if (user) {
+      user.totalUploaded -= 1;
+      user.uploadedDocs = user.uploadedDocs.filter(
+        (id) => id.toString() !== docId
+      );
+      await user.save();
+    }
+
+    // Delete the file from Google Drive
+    await deleteFile(document.fileId);
+
+    // Delete the document from the database
+    await Document.findByIdAndDelete(docId);
+
+    res.status(200).json({ message: "Document deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 const commentOnDocument = async (req, res) => {
   const { docId, comment, userId } = req.body;
