@@ -10,6 +10,9 @@ const resourceSchema = new Schema({
   parentFolder: { type: Schema.Types.ObjectId, ref: 'Folder' },
   byAdmin:{
     type:Boolean,required:false
+  },
+  isAccepted:{
+    type:Boolean,required:false,default:false
   },  
 });
 

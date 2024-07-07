@@ -151,13 +151,33 @@ const getResourcesByUser = async (req, res) => {
     }
 };
 
-const acceptResource=async(req,res)=>{
-  try{
+const acceptResource = async (req, res) => {
+  try {
+    const { rscId } = req.body;
 
+    // Validate rscId
+    if (!rscId) {
+      return res.status(400).json({ message: 'Resource ID is required' });
+    }
+
+    // Find and update the resource
+    const updatedResource = await Resource.findByIdAndUpdate(
+      rscId,
+      { isAccepted: true },
+      { new: true }
+    );
+
+    // Check if resource was found and updated
+    if (!updatedResource) {
+      return res.status(404).json({ message: 'Resource not found' });
+    }
+
+    // Return the updated resource
+    res.status(200).json({ message: 'Resource accepted successfully', resource: updatedResource });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
   }
-  catch(err){
-    
-  }
-}
+};
 
 module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser,getAllResource ,acceptResource};
