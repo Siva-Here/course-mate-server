@@ -151,4 +151,13 @@ const getResourcesByUser = async (req, res) => {
     }
 };
 
-module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser,getAllResource };
+const acceptResource=async(req,res)=>{
+  try{
+
+  }
+  catch(err){
+    
+  }
+}
+
+module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser,getAllResource ,acceptResource};

@@ -7,6 +7,7 @@ const {
   getResourcesByFolder,
   getResourcesByUser,
   getAllResource,
+  acceptResource,
 } = require("../controllers/resourceController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
