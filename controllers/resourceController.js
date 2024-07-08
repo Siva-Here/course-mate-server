@@ -78,7 +78,7 @@ const updateResource = async (req, res) => {
 
 const getAllResource = async (req, res) => {
   try {
-    const resources = await Resource.find().select('-_id');
+    const resources = await Resource.find().select();
 
     const updatedResources = await Promise.all(
       resources.map(async (resource) => {
