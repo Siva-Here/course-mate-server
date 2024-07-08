@@ -78,8 +78,8 @@ const updateResource = async (req, res) => {
 
 const getAllResource = async (req, res) => {
   try {
-    const resources = await Resource.find().select();
-
+    const resources = await Resource.find().select();  
+// note
     const updatedResources = await Promise.all(
       resources.map(async (resource) => {
         const user = await User.findById(resource.uploadedBy).select('username');
@@ -119,7 +119,7 @@ const getResourcesByFolder = async (req, res) => {
 
   try {
     // Fetch resources by folderId
-    const resources = await Resource.find({ parentFolder: folderId }).select('-_id');
+    const resources = await Resource.find({ parentFolder: folderId });
 
     // Iterate over each resource to replace uploadedBy with the username
     const updatedResources = await Promise.all(
