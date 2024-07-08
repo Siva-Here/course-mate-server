@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 
 app.use("/folder",require("../routes/folderRoutes"));
 app.use("/document",require("../routes/documentRoutes"));
-app.use("/comment",require("../routes/commentRoutes"));
+// app.use("/comment",require("../routes/commentRoutes"));
 // app.use("/contribution",require("../routes/contributionRoutes"));
 app.use("/resource",require("../routes/resourceRoutes"));
 app.use("/user",require("../routes/userRoutes"));

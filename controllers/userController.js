@@ -1,50 +1,6 @@
 const User = require('../model/User');
 const Document = require('../model/Document');
 
-
-// const createUser = async (req, res) => {
-//     try {
-//       const { username, email } = req.body;
-  
-//       if (!username || !email) {
-//         return res.status(400).json({ message: 'Username and email are required' });
-//       }
-  
-//       if (!email.endsWith('@rguktn.ac.in')) {
-//         return res.status(400).json({ message: 'Email domain not allowed' });
-//       }
-
-//       const existingUser = await User.findOne({ $or: [{ email }] });
-//       if (existingUser) {
-//         return res.status(400).json({ message: 'Username or email already exists' });
-//       }
-  
-//       const newUser = new User({
-//         username,
-//         email
-//       });
-  
-//       await newUser.save();
-  
-//       res.status(201).json({ message: 'User created successfully', user: newUser });
-//     } catch (error) {
-//       console.error(error);
-//       res.status(500).json({ message: 'Server error' });
-//     }
-//   };
-
-// const login=async(req,res)=>{
-//     try{
-
-//         res.status(200).json({message:"Login successfull"})
-//     }
-//     catch(err){
-//         console.error(err);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-
-// }
-
 const login = async (req, res) => {
     try {
         console.log(req.userdata);
@@ -60,7 +16,7 @@ const login = async (req, res) => {
   
       // If user exists, return login successful
       if (existingUser) {
-        return res.status(200).json({ message: 'Login successful' });
+        return res.status(200).json({ message: 'Login successful',_id:existingUser._id,username:existingUser.username });
       } else {
         // Validate username and email domain for new user creation
         if (!username) {
@@ -88,22 +44,36 @@ const login = async (req, res) => {
     }
   };
   
-const getAllUsers=async(req,res)=>{
-    try{
-        const users=await User.find();
-        if(users.length>0){
+  const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find().select('-_id -uploadedDocs');
+        if (users.length > 0) {
             res.status(200).json(users);
+        } else {
+            res.status(404).json({ message: "No users found" });
         }
-        else{
-            res.status(404).json({message:"No users found"})
-        }
-    }
-    catch(error){
+    } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
 }
 
+const exists = async (req, res) => {
+    try {
+      const { _id } = req.body;
+      const userExists = await User.findById(_id);
+  
+      if (userExists) {
+        res.status(200).json({ exists: true });
+      } else {
+        res.status(404).json({ exists: false });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+  
 const getUserProfile = async (req, res) => {
     const { userId } = req.body;
 
@@ -113,7 +83,7 @@ const getUserProfile = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        res.status(200).json(user);
+        res.status(200).json({username:user.username});
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -190,4 +160,19 @@ const getUserId = async (req, res) => {
     }
 };
  
-module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId,getAllUsers,login};
+const top10Contributions = async (req, res) => {
+    try {
+      // Find the top 10 users sorted by totalUploaded in descending order
+      const topUsers = await User.find({}, 'username totalUploaded')
+        .sort({ totalUploaded: -1 })
+        .limit(10);
+  
+      // Send the result as JSON
+      res.status(200).json(topUsers);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+
+module.exports = { getUserDocs, getUserProfile, updateUserProfile, deleteUser,getUserId,getAllUsers,login,exists,top10Contributions};

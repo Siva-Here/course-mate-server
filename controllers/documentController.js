@@ -71,7 +71,7 @@ const getDocumentsByFolder = async (req, res) => {
   const { folderId } = req.body;
 
   try {
-    const documents = await Document.find({ parentFolder: folderId });
+    const documents = await Document.find({ parentFolder: folderId }).select('-_id'); 
     res.status(200).json(documents);
   } catch (error) {
     console.error(error);
