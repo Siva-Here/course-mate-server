@@ -351,21 +351,37 @@ const acceptDocument = async (req, res) => {
     }
   };
 
-const getDocs=async(req,res)=>{
-  try{
-    const docs=await Document.find();
-    if(docs.length>0){
-      res.status(200).json({ docs: docs});
+
+const getDocs = async (req, res) => {
+  try {
+    // Fetch documents and populate the uploadedBy field with the user information
+    const docs = await Document.find().populate('uploadedBy', 'username email');
+
+    // Format the documents to exclude fileId and include _id, username for uploadedBy
+    const formattedDocs = docs.map(doc => ({
+      _id: doc._id,
+      name: doc.name,
+      parentFolder: doc.parentFolder,
+      avgRating: doc.avgRating,
+      uploadedBy: doc.uploadedBy.username,
+      createdAt: doc.createdAt,
+      rscLink: doc.rscLink,
+      viewLink: doc.viewLink,
+      downloadLink: doc.downloadLink,
+      isAccepted: doc.isAccepted
+    }));
+
+    if (formattedDocs.length > 0) {
+      res.status(200).json({ docs: formattedDocs });
+    } else {
+      res.status(404).json({ message: "No docs found..." });
     }
-    else{
-      res.status(401).json({message:"No docs found..."})
-    }
-  }
-  catch(err){
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
-}
+};
+
 
 module.exports = {
   uploadDocument,
