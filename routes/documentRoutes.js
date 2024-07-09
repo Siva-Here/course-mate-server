@@ -18,7 +18,7 @@ router.get("/docs",auth,getDocs);
 router.post("/accept",authAdmin,acceptDocument);
 router.post("/saveDocument",auth,saveDocument);
 router.post("/upload",auth,uploadDocument);
-router.post("/folder",auth, getDocumentsByFolder);
+// router.post("/folder",auth, getDocumentsByFolder);
 // router.get("/",auth, getDocumentById);
 // router.put("/",authAdmin,updateDocument);
 router.delete("/", authAdmin,deleteDocument);

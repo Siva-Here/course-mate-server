@@ -19,7 +19,7 @@ router.post("/create",auth, createResource);
 // router.post("/",auth, getResourceById);
 // router.put("/",authAdmin,updateResource);
 router.delete("/",authAdmin,deleteResource); 
-router.post("/folder",auth,getResourcesByFolder);
+// router.post("/folder",auth,getResourcesByFolder);
 // router.post("/user",auth,getResourcesByUser);
 
 module.exports = router;

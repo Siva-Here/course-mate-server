@@ -15,7 +15,7 @@ const authAdmin = require("../middlewares/authAdmin");
 
 const router = express.Router();
 
-router.post("/uploadDoc",auth,uploadDoc);
+// router.post("/uploadDoc",auth,uploadDoc);
 // router.get("/getDocs",auth, getDocs);
 
 // router.post("/createFolder",authAdmin,createFolder);

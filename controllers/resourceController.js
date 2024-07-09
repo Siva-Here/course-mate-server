@@ -4,33 +4,97 @@ const User = require('../model/User');
 const mongoose = require('mongoose');
 const {jwtDecode} = require('jwt-decode');
 
+// const createResource = async (req, res) => {
+//   const { name, description, rscLink, folderId, userId } = req.body;
+//   console.log(folderId);
+//   const bearerHeader = req.headers['authorization'];
+//   if (typeof bearerHeader !== 'undefined') {
+//     const bearerToken = bearerHeader.split(' ')[1];
+//     try {
+//       const decodedToken = jwtDecode(bearerToken);
+//       const user = await User.findById({_id:userId});
+//       console.log(user.email);
+//       console.log(decodedToken.email);
+//       if(!(decodedToken.email==user.email)){
+//       return res.status(401).json({message: "User Not Allowed!!!"});
+//     }}catch(error){
+//       console.log(error);
+//       return res.status(500).json({message: "Internal Server Error"});
+//     }
+//     try {
+//       const user = await User.findById({_id:userId});
+//       console.log(user);
+//       if (!user) {
+//         return res.status(404).json({ message: 'User not found' });
+//       }
+      
+//       const folder = await Folder.find({_id:folderId});
+//       console.log(folder);
+//       if (folder.length<1 || (!folder)) {
+//         return res.status(404).json({ message: 'Folder not found' });
+//       }
+  
+//       const newResource = new Resource({
+//         name,
+//         description,
+//         rscLink,
+//         uploadedBy: user._id,
+//         parentFolder: folder._id,
+//         byAdmin: user.isAdmin
+//       });
+//       const savedResource = await newResource.save();
+  
+//       // Increment the totalUploaded count for the user
+//       user.totalUploaded += 0;
+//       await user.save();
+  
+//       res.status(201).json(savedResource);
+//     } catch (error) {
+//       console.error(error);
+//       res.status(500).json({ message: 'Server error' });
+//     }
+//   }
+//   };
+
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
 const createResource = async (req, res) => {
   const { name, description, rscLink, folderId, userId } = req.body;
+  
+  // Validate folderId and userId
+  if (!isValidObjectId(folderId)) {
+    return res.status(400).json({ message: 'Invalid folderId' });
+  }
+  if (!isValidObjectId(userId)) {
+    return res.status(400).json({ message: 'Invalid userId' });
+  }
+
   const bearerHeader = req.headers['authorization'];
   if (typeof bearerHeader !== 'undefined') {
     const bearerToken = bearerHeader.split(' ')[1];
     try {
       const decodedToken = jwtDecode(bearerToken);
       const user = await User.findById(userId);
-      console.log(user.email);
-      console.log(decodedToken.email);
-      if(!(decodedToken.email==user.email)){
-      return res.status(401).json({message: "User Not Allowed!!!"});
-    }}catch(error){
-      console.log(error);
-      return res.status(500).json({message: "Internal Server Error"});
+      if (!(decodedToken.email === user.email)) {
+        return res.status(401).json({ message: "User Not Allowed!!!" });
+      }
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
+    
     try {
       const user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
-      
+
       const folder = await Folder.findById(folderId);
       if (!folder) {
         return res.status(404).json({ message: 'Folder not found' });
       }
-  
+
       const newResource = new Resource({
         name,
         description,
@@ -40,18 +104,20 @@ const createResource = async (req, res) => {
         byAdmin: user.isAdmin
       });
       const savedResource = await newResource.save();
-  
+
       // Increment the totalUploaded count for the user
       user.totalUploaded += 0;
       await user.save();
-  
+
       res.status(201).json(savedResource);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
+  } else {
+    res.status(403).json({ message: "Forbidden" });
   }
-  };
+};
 
 const getResourceById = async (req, res) => {
     const { rscId } = req.body;
