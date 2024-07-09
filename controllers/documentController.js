@@ -169,6 +169,67 @@ const deleteFile = async (fileId) => {
   }
 };
 
+// const saveDocument = async (req, res) => {
+//   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
+//   const bearerHeader = req.headers['authorization'];
+
+//   if (!bearerHeader) {
+//     return res.status(403).json({ message: "Authorization token is required" });
+//   }
+
+//   const bearerToken = bearerHeader.split(' ')[1];
+  
+//   if (!fileId || !name || !viewLink || !downloadLink || !parentFolder || !uploadedBy) {
+//     return res.status(400).json({ error: "Missing required fields" });
+//   }
+
+//   try {
+//     const decodedToken = jwtDecode(bearerToken);
+//     const user = await User.findById(uploadedBy);
+    
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     console.log('User email from database:', user.email);
+//     console.log('User email from token:', decodedToken.email);
+
+//     if (decodedToken.email !== user.email) {
+//       return res.status(401).json({ message: "User Not Allowed!!!" });
+//     }
+
+//     // Create and save the new document
+//     const newDocument = new Document({
+//       name,
+//       parentFolder,
+//       uploadedBy,
+//       viewLink,
+//       downloadLink,
+//       fileId
+//     });
+
+//     const savedDocument = await newDocument.save();
+
+//     // Find the user and update their totalUploaded count and uploadedDocs array
+//     await User.findByIdAndUpdate(
+//       uploadedBy,
+//       {
+//         $inc: { totalUploaded: 0 },
+//         $push: { uploadedDocs: savedDocument._id }
+//       },
+//       { new: true } // This option returns the modified document rather than the original
+//     );
+
+//     return res.status(201).json({
+//       message: "Document saved successfully",
+//       document: savedDocument
+//     });
+//   } catch (error) {
+//     console.error("Error saving document:", error);
+//     return res.status(500).json({ error: "Failed to save the document" });
+//   }
+// };
+
 const saveDocument = async (req, res) => {
   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
   const bearerHeader = req.headers['authorization'];
@@ -209,16 +270,6 @@ const saveDocument = async (req, res) => {
     });
 
     const savedDocument = await newDocument.save();
-
-    // Find the user and update their totalUploaded count and uploadedDocs array
-    await User.findByIdAndUpdate(
-      uploadedBy,
-      {
-        $inc: { totalUploaded: 1 },
-        $push: { uploadedDocs: savedDocument._id }
-      },
-      { new: true } // This option returns the modified document rather than the original
-    );
 
     return res.status(201).json({
       message: "Document saved successfully",
@@ -284,7 +335,7 @@ const deleteDocument = async (req, res) => {
 
     const user = await User.findById(document.uploadedBy);
     if (user) {
-      user.totalUploaded -= 1;
+      user.totalUploaded -= 0;
       user.uploadedDocs = user.uploadedDocs.filter(
         (id) => id.toString() !== docId
       );
@@ -332,24 +383,53 @@ const commentOnDocument = async (req, res) => {
   }
 };
 
-const acceptDocument = async (req, res) => {
-    const { docId } = req.body;
+// const acceptDocument = async (req, res) => {
+//     const { docId } = req.body;
   
-    try {
-      const document = await Document.findById(docId);
-      if (!document) {
-        return res.status(404).json({ message: "Document not found" });
-      }
+//     try {
+//       const document = await Document.findById(docId);
+//       if (!document) {
+//         return res.status(404).json({ message: "Document not found" });
+//       }
       
-      document.isAccepted = true;
-      await document.save();
+//       document.isAccepted = true;
+//       await document.save();
   
-      res.status(200).json({ message: "Document accepted successfully", isAccepted: document.isAccepted });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server error" });
+//       res.status(200).json({ message: "Document accepted successfully", isAccepted: document.isAccepted });
+//     } catch (err) {
+//       console.error(err);
+//       res.status(500).json({ message: "Server error" });
+//     }
+//   };
+
+const acceptDocument = async (req, res) => {
+  const { docId } = req.body;
+
+  try {
+    const document = await Document.findById(docId);
+    if (!document) {
+      return res.status(404).json({ message: "Document not found" });
     }
-  };
+    
+    document.isAccepted = true;
+    await document.save();
+
+    // Increment the totalUploaded count of the user who uploaded the document
+    const user = await User.findById(document.uploadedBy);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    await User.findByIdAndUpdate(
+      document.uploadedBy,
+      { $inc: { totalUploaded: 1 } }
+    );
+
+    res.status(200).json({ message: "Document accepted successfully", isAccepted: document.isAccepted });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 
 const getDocs = async (req, res) => {

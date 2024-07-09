@@ -42,7 +42,7 @@ const createResource = async (req, res) => {
       const savedResource = await newResource.save();
   
       // Increment the totalUploaded count for the user
-      user.totalUploaded += 1;
+      user.totalUploaded += 0;
       await user.save();
   
       res.status(201).json(savedResource);
@@ -145,8 +145,8 @@ const deleteResource = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update the user's totalUploaded count to decrement by 1
-    await User.findByIdAndUpdate(user._id, { $inc: { totalUploaded: -1 } });
+    // Update the user's totalUploaded count to decrement by 0
+    await User.findByIdAndUpdate(user._id, { $inc: { totalUploaded: -0 } });
 
     // Delete the resource from the database
     await Resource.findByIdAndDelete(rscId);
@@ -206,7 +206,7 @@ const acceptResource = async (req, res) => {
       return res.status(400).json({ message: 'Resource ID is required' });
     }
 
-    // Find and update the resource
+    // Find the resource and update isAccepted field
     const updatedResource = await Resource.findByIdAndUpdate(
       rscId,
       { isAccepted: true },
@@ -217,6 +217,16 @@ const acceptResource = async (req, res) => {
     if (!updatedResource) {
       return res.status(404).json({ message: 'Resource not found' });
     }
+
+    // Increment the totalUploaded count of the user who uploaded the resource
+    const user = await User.findById(updatedResource.uploadedBy);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    await User.findByIdAndUpdate(
+      updatedResource.uploadedBy,
+      { $inc: { totalUploaded: 1 } }
+    );
 
     // Return the updated resource
     res.status(200).json({ message: 'Resource accepted successfully', resource: updatedResource });
