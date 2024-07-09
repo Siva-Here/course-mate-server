@@ -112,22 +112,52 @@ const getAllResource = async (req, res) => {
   }
 };
 
+// const deleteResource = async (req, res) => {
+//     const { rscId } = req.body;
+
+//     try {
+//         const resource = await Resource.findById(rscId);
+//         if (!resource) {
+//             return res.status(404).json({ message: 'Resource not found' });
+//         }
+
+//         await Resource.findByIdAndDelete(rscId);
+//         res.status(200).json({ message: 'Resource deleted successfully' });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'Server error' });
+//     }
+// };
+
 const deleteResource = async (req, res) => {
-    const { rscId } = req.body;
+  const { rscId } = req.body;
 
-    try {
-        const resource = await Resource.findById(rscId);
-        if (!resource) {
-            return res.status(404).json({ message: 'Resource not found' });
-        }
-
-        await Resource.findByIdAndDelete(rscId);
-        res.status(200).json({ message: 'Resource deleted successfully' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+  try {
+    const resource = await Resource.findById(rscId);
+    if (!resource) {
+      return res.status(404).json({ message: 'Resource not found' });
     }
+
+    // Get the user who uploaded the resource
+    const user = await User.findById(resource.uploadedBy);
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update the user's totalUploaded count to decrement by 1
+    await User.findByIdAndUpdate(user._id, { $inc: { totalUploaded: -1 } });
+
+    // Delete the resource from the database
+    await Resource.findByIdAndDelete(rscId);
+
+    res.status(200).json({ message: 'Resource deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
+
 
 const getResourcesByFolder = async (req, res) => {
   const { folderId } = req.body;
