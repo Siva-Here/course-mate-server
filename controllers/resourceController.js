@@ -2,10 +2,24 @@ const Resource = require('../model/Resource');
 const Folder = require('../model/Folder');
 const User = require('../model/User');
 const mongoose = require('mongoose');
+const {jwtDecode} = require('jwt-decode');
 
 const createResource = async (req, res) => {
-    const { name, description, rscLink, folderId, userId } = req.body;
-  
+  const { name, description, rscLink, folderId, userId } = req.body;
+  const bearerHeader = req.headers['authorization'];
+  if (typeof bearerHeader !== 'undefined') {
+    const bearerToken = bearerHeader.split(' ')[1];
+    try {
+      const decodedToken = jwtDecode(bearerToken);
+      const user = await User.findById(userId);
+      console.log(user.email);
+      console.log(decodedToken.email);
+      if(!(decodedToken.email==user.email)){
+      return res.status(401).json({message: "User Not Allowed!!!"});
+    }}catch(error){
+      console.log(error);
+      return res.status(500).json({message: "Internal Server Error"});
+    }
     try {
       const user = await User.findById(userId);
       if (!user) {
@@ -36,6 +50,7 @@ const createResource = async (req, res) => {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
+  }
   };
 
 const getResourceById = async (req, res) => {

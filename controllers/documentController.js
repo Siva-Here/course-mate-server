@@ -7,6 +7,7 @@ const path = require("path");
 const fs = require("fs");
 const multer = require("multer");
 const { format } = require("date-fns");
+const {jwtDecode}=require('jwt-decode');
 require("dotenv").config();
 
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -170,12 +171,33 @@ const deleteFile = async (fileId) => {
 
 const saveDocument = async (req, res) => {
   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
+  const bearerHeader = req.headers['authorization'];
 
+  if (!bearerHeader) {
+    return res.status(403).json({ message: "Authorization token is required" });
+  }
+
+  const bearerToken = bearerHeader.split(' ')[1];
+  
   if (!fileId || !name || !viewLink || !downloadLink || !parentFolder || !uploadedBy) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
+    const decodedToken = jwtDecode(bearerToken);
+    const user = await User.findById(uploadedBy);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    console.log('User email from database:', user.email);
+    console.log('User email from token:', decodedToken.email);
+
+    if (decodedToken.email !== user.email) {
+      return res.status(401).json({ message: "User Not Allowed!!!" });
+    }
+
     // Create and save the new document
     const newDocument = new Document({
       name,
@@ -207,6 +229,7 @@ const saveDocument = async (req, res) => {
     return res.status(500).json({ error: "Failed to save the document" });
   }
 };
+
 
 const getDocumentById = async (req, res) => {
   const { docId } = req.body;
