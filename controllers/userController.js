@@ -162,8 +162,7 @@ const getUserId = async (req, res) => {
  
 const top10Contributions = async (req, res) => {
     try {
-      // Find the top 10 users sorted by totalUploaded in descending order
-      const topUsers = await User.find({}, 'username totalUploaded')
+      const topUsers = await User.find({}, 'username totalUploaded -_id')
         .sort({ totalUploaded: -1 })
         .limit(10);
   
