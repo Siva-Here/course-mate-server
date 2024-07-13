@@ -5,7 +5,7 @@ const login = async (req, res) => {
   try {
     const { email, username } = req.userdata; // Destructure email and username from req
     const { token } = req.body;
-
+    console.log(token);
     // Check if email, username, and token are present
     if (!email || !username || !token) {
       return res.status(400).json({ message: 'Email, username, and token are required' });
