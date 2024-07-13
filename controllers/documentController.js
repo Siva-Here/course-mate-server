@@ -8,6 +8,9 @@ const fs = require("fs");
 const multer = require("multer");
 const { format } = require("date-fns");
 const {jwtDecode}=require('jwt-decode');
+const { JWT } = require('google-auth-library');
+const axios=require('axios');
+const {sendFcmMessage} = require('../firebase/sendNotification');
 require("dotenv").config();
 
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -169,66 +172,6 @@ const deleteFile = async (fileId) => {
   }
 };
 
-// const saveDocument = async (req, res) => {
-//   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
-//   const bearerHeader = req.headers['authorization'];
-
-//   if (!bearerHeader) {
-//     return res.status(403).json({ message: "Authorization token is required" });
-//   }
-
-//   const bearerToken = bearerHeader.split(' ')[1];
-  
-//   if (!fileId || !name || !viewLink || !downloadLink || !parentFolder || !uploadedBy) {
-//     return res.status(400).json({ error: "Missing required fields" });
-//   }
-
-//   try {
-//     const decodedToken = jwtDecode(bearerToken);
-//     const user = await User.findById(uploadedBy);
-    
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     console.log('User email from database:', user.email);
-//     console.log('User email from token:', decodedToken.email);
-
-//     if (decodedToken.email !== user.email) {
-//       return res.status(401).json({ message: "User Not Allowed!!!" });
-//     }
-
-//     // Create and save the new document
-//     const newDocument = new Document({
-//       name,
-//       parentFolder,
-//       uploadedBy,
-//       viewLink,
-//       downloadLink,
-//       fileId
-//     });
-
-//     const savedDocument = await newDocument.save();
-
-//     // Find the user and update their totalUploaded count and uploadedDocs array
-//     await User.findByIdAndUpdate(
-//       uploadedBy,
-//       {
-//         $inc: { totalUploaded: 0 },
-//         $push: { uploadedDocs: savedDocument._id }
-//       },
-//       { new: true } // This option returns the modified document rather than the original
-//     );
-
-//     return res.status(201).json({
-//       message: "Document saved successfully",
-//       document: savedDocument
-//     });
-//   } catch (error) {
-//     console.error("Error saving document:", error);
-//     return res.status(500).json({ error: "Failed to save the document" });
-//   }
-// };
 
 const saveDocument = async (req, res) => {
   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
@@ -383,25 +326,6 @@ const commentOnDocument = async (req, res) => {
   }
 };
 
-// const acceptDocument = async (req, res) => {
-//     const { docId } = req.body;
-  
-//     try {
-//       const document = await Document.findById(docId);
-//       if (!document) {
-//         return res.status(404).json({ message: "Document not found" });
-//       }
-      
-//       document.isAccepted = true;
-//       await document.save();
-  
-//       res.status(200).json({ message: "Document accepted successfully", isAccepted: document.isAccepted });
-//     } catch (err) {
-//       console.error(err);
-//       res.status(500).json({ message: "Server error" });
-//     }
-//   };
-
 const acceptDocument = async (req, res) => {
   const { docId } = req.body;
 
@@ -410,7 +334,7 @@ const acceptDocument = async (req, res) => {
     if (!document) {
       return res.status(404).json({ message: "Document not found" });
     }
-    
+
     document.isAccepted = true;
     await document.save();
 
@@ -419,17 +343,44 @@ const acceptDocument = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    await User.findByIdAndUpdate(
-      document.uploadedBy,
-      { $inc: { totalUploaded: 1 } }
-    );
+    await User.findByIdAndUpdate(document.uploadedBy, { $inc: { totalUploaded: 1 } });
 
-    res.status(200).json({ message: "Document accepted successfully", isAccepted: document.isAccepted });
+    // Retrieve the parent folder
+    const parentFolder = await Folder.findById(document.parentFolder);
+    if (!parentFolder) {
+      return res.status(404).json({ message: "Parent folder not found" });
+    }
+
+    let body = `Document uploaded in ${parentFolder.name}`;
+    // Retrieve the parent of the parent folder (grandparent folder)
+    const grandParentFolder = await Folder.findById(parentFolder.parentFolder);
+    if (grandParentFolder) {
+      body+=`, under ${grandParentFolder.name}`
+    }else{
+      body+=' in GATE';
+    }
+
+    // Use both parent and grandparent folder names in the notification body
+    const title = document.name;
+
+    // Send notification to all users
+    const users = await User.find({ token: { $exists: true, $ne: null } });
+    const tokens = users.map(user => user.token);
+    const success = await sendFcmMessage(tokens, title, body);
+
+    if (success) {
+      res.status(200).send({ message: "Notification sent successfully" });
+    } else {
+      res.status(500).send({ message: "Failed to send some notifications" });
+    }
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+module.exports = { acceptDocument };
 
 
 const getDocs = async (req, res) => {

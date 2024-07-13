@@ -1,4 +1,5 @@
 const {jwtDecode} = require('jwt-decode');
+const emails=require('../db/emails');
 const verifyToken = (req, res, next) => {
   const bearerHeader = req.headers['authorization'];
   if (typeof bearerHeader !== 'undefined') {
@@ -9,7 +10,13 @@ const verifyToken = (req, res, next) => {
       console.log(decodedToken);
       // Check if userEmail ends with '@rguktn.ac.in'
       if (decodedToken.email.slice(-13) === '@rguktn.ac.in') {
-        next();
+        console.log(decodedToken.email.indexOf('@'));
+        if(emails.includes(decodedToken.email.toLowerCase())) {
+          next();
+        }
+        else{
+          res.status(401).json({error:'Unauthorized: Only CSE Mails are allowed...'});
+        }
       } else {
         res.status(401).json({ error: 'Unauthorized: Email domain not allowed' });
       }

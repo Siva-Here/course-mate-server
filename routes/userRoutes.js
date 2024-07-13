@@ -16,7 +16,7 @@ const router = express.Router();
 
 // router.post("/create",auth,createUser);
 router.post("/exists",auth,exists)
-router.get("/login",auth,login);
+router.post("/login",auth,login);
 router.get("/contributions",auth,top10Contributions);
 // router.get("/users",auth,getAllUsers);
 // router.post("/getUserId",auth,getUserId);

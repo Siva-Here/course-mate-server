@@ -13,6 +13,9 @@ const resourceSchema = new Schema({
   },
   isAccepted:{
     type:Boolean,required:false,default:false
+  },
+  isPlacement:{
+    type:Boolean,required:false,default:false
   },  
 });
 

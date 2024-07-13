@@ -2,66 +2,94 @@ const Resource = require('../model/Resource');
 const Folder = require('../model/Folder');
 const User = require('../model/User');
 const mongoose = require('mongoose');
-const {jwtDecode} = require('jwt-decode');
+const { jwtDecode } = require('jwt-decode');
+const { sendFcmMessage } = require('../firebase/sendNotification');
+
+
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 // const createResource = async (req, res) => {
 //   const { name, description, rscLink, folderId, userId } = req.body;
-//   console.log(folderId);
+
+//   // Validate folderId and userId
+//   if (!isValidObjectId(folderId)) {
+//     return res.status(400).json({ message: 'Invalid folderId' });
+//   }
+//   if (!isValidObjectId(userId)) {
+//     return res.status(400).json({ message: 'Invalid userId' });
+//   }
+
 //   const bearerHeader = req.headers['authorization'];
 //   if (typeof bearerHeader !== 'undefined') {
 //     const bearerToken = bearerHeader.split(' ')[1];
 //     try {
 //       const decodedToken = jwtDecode(bearerToken);
-//       const user = await User.findById({_id:userId});
-//       console.log(user.email);
-//       console.log(decodedToken.email);
-//       if(!(decodedToken.email==user.email)){
-//       return res.status(401).json({message: "User Not Allowed!!!"});
-//     }}catch(error){
-//       console.log(error);
-//       return res.status(500).json({message: "Internal Server Error"});
+//       const user = await User.findById(userId);
+//       if (!(decodedToken.email === user.email)) {
+//         return res.status(401).json({ message: "User Not Allowed!!!" });
+//       }
+//     } catch (error) {
+//       console.error(error);
+//       return res.status(500).json({ message: "Internal Server Error" });
 //     }
+
 //     try {
-//       const user = await User.findById({_id:userId});
-//       console.log(user);
+//       const user = await User.findById(userId);
 //       if (!user) {
 //         return res.status(404).json({ message: 'User not found' });
 //       }
-      
-//       const folder = await Folder.find({_id:folderId});
-//       console.log(folder);
-//       if (folder.length<1 || (!folder)) {
+
+
+//       const folder = await Folder.findById(folderId);
+//       if (!folder) {
 //         return res.status(404).json({ message: 'Folder not found' });
 //       }
-  
 //       const newResource = new Resource({
 //         name,
 //         description,
 //         rscLink,
 //         uploadedBy: user._id,
 //         parentFolder: folder._id,
-//         byAdmin: user.isAdmin
+//         byAdmin: user.isAdmin,
+//         isPlacement: folder.name == "placements"
 //       });
 //       const savedResource = await newResource.save();
-  
+      
 //       // Increment the totalUploaded count for the user
 //       user.totalUploaded += 0;
 //       await user.save();
-  
+      
+//       if (folder.name == "placements") {
+//         const title = name;
+//         let body = `${name} brochure uploaded in placements`;
+
+//         // Send notification to all users with valid tokens
+//         const users = await User.find({ token: { $exists: true, $ne: null } });
+//         // Extract tokens from users
+//         const tokens = users.map(user => user.token);
+
+//         // Send FCM message with tokens array
+//         const notificationResult = await sendFcmMessage(tokens, title, body);
+
+//         if (notificationResult) {
+//           res.status(200).send({ message: "Notification sent successfully" });
+//         } else {
+//           res.status(500).send({ message: "Failed to send notifications" });
+//         }
+//       }
 //       res.status(201).json(savedResource);
 //     } catch (error) {
 //       console.error(error);
 //       res.status(500).json({ message: 'Server error' });
 //     }
+//   } else {
+//     res.status(403).json({ message: "Forbidden" });
 //   }
-//   };
-
-
-const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+// };
 
 const createResource = async (req, res) => {
   const { name, description, rscLink, folderId, userId } = req.body;
-  
+
   // Validate folderId and userId
   if (!isValidObjectId(folderId)) {
     return res.status(400).json({ message: 'Invalid folderId' });
@@ -83,7 +111,7 @@ const createResource = async (req, res) => {
       console.error(error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
-    
+
     try {
       const user = await User.findById(userId);
       if (!user) {
@@ -101,66 +129,87 @@ const createResource = async (req, res) => {
         rscLink,
         uploadedBy: user._id,
         parentFolder: folder._id,
-        byAdmin: user.isAdmin
+        byAdmin: user.isAdmin,
+        isPlacement: folder.name == "placements"
       });
       const savedResource = await newResource.save();
 
       // Increment the totalUploaded count for the user
-      user.totalUploaded += 0;
+      user.totalUploaded += 1; // You had user.totalUploaded += 0, changed to += 1 assuming it's a typo
       await user.save();
 
-      res.status(201).json(savedResource);
+      // Send notification if it's a placement resource
+      if (folder.name == "placements") {
+        const title = name;
+        const body = `${name} brochure uploaded in placements`;
+
+        // Send notification to all users with valid tokens
+        const users = await User.find({ token: { $exists: true, $ne: null } });
+        const tokens = users.map(user => user.token);
+
+        // Send FCM message with tokens array
+        const notificationResult = await sendFcmMessage(tokens, title, body);
+
+        if (notificationResult) {
+          return res.status(200).json({ message: "Notification sent successfully" });
+        } else {
+          return res.status(500).json({ message: "Failed to send notifications" });
+        }
+      }
+
+      return res.status(201).json(savedResource);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Server error' });
+      return res.status(500).json({ message: 'Server error' });
     }
   } else {
-    res.status(403).json({ message: "Forbidden" });
+    return res.status(403).json({ message: "Forbidden" });
   }
 };
 
-const getResourceById = async (req, res) => {
-    const { rscId } = req.body;
 
-    try {
-        const resource = await Resource.findById(rscId);
-        if (!resource) {
-            return res.status(404).json({ message: 'Resource not found' });
-        }
-        res.status(200).json(resource);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+const getResourceById = async (req, res) => {
+  const { rscId } = req.body;
+
+  try {
+    const resource = await Resource.findById(rscId);
+    if (!resource) {
+      return res.status(404).json({ message: 'Resource not found' });
     }
+    res.status(200).json(resource);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 
 const updateResource = async (req, res) => {
-    const { rscId, name, description, rscLink } = req.body;
+  const { rscId, name, description, rscLink } = req.body;
 
-    try {
-        const resource = await Resource.findById(rscId);
-        if (!resource) {
-            return res.status(404).json({ message: 'Resource not found' });
-        }
-
-        resource.name = name || resource.name;
-        resource.description = description || resource.description;
-        resource.rscLink = rscLink || resource.rscLink;
-
-        const updatedResource = await resource.save();
-        res.status(200).json(updatedResource);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+  try {
+    const resource = await Resource.findById(rscId);
+    if (!resource) {
+      return res.status(404).json({ message: 'Resource not found' });
     }
+
+    resource.name = name || resource.name;
+    resource.description = description || resource.description;
+    resource.rscLink = rscLink || resource.rscLink;
+
+    const updatedResource = await resource.save();
+    res.status(200).json(updatedResource);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 
 const getAllResource = async (req, res) => {
   try {
-    const resources = await Resource.find().select();  
-// note
+    const resources = await Resource.find().select();
+    // note
     const updatedResources = await Promise.all(
       resources.map(async (resource) => {
         const user = await User.findById(resource.uploadedBy).select('username');
@@ -178,22 +227,7 @@ const getAllResource = async (req, res) => {
   }
 };
 
-// const deleteResource = async (req, res) => {
-//     const { rscId } = req.body;
 
-//     try {
-//         const resource = await Resource.findById(rscId);
-//         if (!resource) {
-//             return res.status(404).json({ message: 'Resource not found' });
-//         }
-
-//         await Resource.findByIdAndDelete(rscId);
-//         res.status(200).json({ message: 'Resource deleted successfully' });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Server error' });
-//     }
-// };
 
 const deleteResource = async (req, res) => {
   const { rscId } = req.body;
@@ -252,54 +286,82 @@ const getResourcesByFolder = async (req, res) => {
 
 
 const getResourcesByUser = async (req, res) => {
-    const { userId } = req.body;
+  const { userId } = req.body;
 
-    try {
-        const resources = await Resource.find({ uploadedBy: userId });
-        res.status(200).json(resources);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
-    }
+  try {
+    const resources = await Resource.find({ uploadedBy: userId });
+    res.status(200).json(resources);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
 };
 
 const acceptResource = async (req, res) => {
-  try {
-    const { rscId } = req.body;
+  const { rscId } = req.body;
 
+  try {
     // Validate rscId
     if (!rscId) {
       return res.status(400).json({ message: 'Resource ID is required' });
     }
 
-    // Find the resource and update isAccepted field
-    const updatedResource = await Resource.findByIdAndUpdate(
-      rscId,
-      { isAccepted: true },
-      { new: true }
-    );
-
-    // Check if resource was found and updated
-    if (!updatedResource) {
+    // Find the resource
+    const resource = await Resource.findById(rscId);
+    if (!resource) {
       return res.status(404).json({ message: 'Resource not found' });
     }
 
+    // Update the isAccepted field
+    resource.isAccepted = true;
+    await resource.save();
+
     // Increment the totalUploaded count of the user who uploaded the resource
-    const user = await User.findById(updatedResource.uploadedBy);
+    const user = await User.findById(resource.uploadedBy);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    await User.findByIdAndUpdate(
-      updatedResource.uploadedBy,
-      { $inc: { totalUploaded: 1 } }
-    );
+    await User.findByIdAndUpdate(resource.uploadedBy, { $inc: { totalUploaded: 1 } });
 
-    // Return the updated resource
-    res.status(200).json({ message: 'Resource accepted successfully', resource: updatedResource });
+    // Retrieve the parent folder
+    const parentFolder = await Folder.findById(resource.parentFolder);
+    if (!parentFolder) {
+      return res.status(404).json({ message: 'Parent folder not found' });
+    }
+
+    // Retrieve the parent of the parent folder (grandparent folder)
+    let grandParentFolder;
+    if (parentFolder.parentFolder) {
+      grandParentFolder = await Folder.findById(parentFolder.parentFolder);
+    }
+
+    // Use both parent and grandparent folder names in the notification body
+    const title = resource.name;
+    let body = `Resource uploaded in ${parentFolder.name}`;
+    if (grandParentFolder) {
+      body += `, under ${grandParentFolder.name}`;
+    }
+
+    // Send notification to all users with valid tokens
+    const users = await User.find({ token: { $exists: true, $ne: null } });
+
+    // Extract tokens from users
+    const tokens = users.map(user => user.token);
+
+    // Send FCM message with tokens array
+    const notificationResult = await sendFcmMessage(tokens, title, body);
+
+    if (notificationResult) {
+      res.status(200).send({ message: "Notification sent successfully" });
+    } else {
+      res.status(500).send({ message: "Failed to send notifications" });
+    }
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser,getAllResource ,acceptResource};
+
+module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser, getAllResource, acceptResource };

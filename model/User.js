@@ -8,7 +8,10 @@ const userSchema = new Schema({
   uploadedDocs: [{ type: Schema.Types.ObjectId, ref: 'Document' }],
   isAdmin:{
     type:Boolean,required:false,default:false,
-  }  
+  },
+  token:{
+    type:String,required:false,default:null,
+  }
 });
 
 const User = mongoose.model('User', userSchema);   

@@ -7,6 +7,7 @@ const app=express();
 dotenv.config(); 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json());
 
 app.use("/folder",require("../routes/folderRoutes"));
 app.use("/document",require("../routes/documentRoutes"));
