@@ -52,8 +52,8 @@ const createResource = async (req, res) => {
       uploadedBy: user._id,
       parentFolder: folder._id,
       byAdmin: user.isAdmin,
-      isAccepted: folder.name === "placements" && (authPlacement),
-      isPlacement: folder.name === "placements" && (authPlacement)
+      isAccepted: folder.name === "placements" && authPlacement,
+      isPlacement: folder.name === "placements" && authPlacement
     });
 
     const savedResource = await newResource.save();
@@ -165,7 +165,6 @@ const getAllResource = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-
 
 
 const deleteResource = async (req, res) => {
