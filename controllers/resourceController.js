@@ -59,7 +59,7 @@ const createResource = async (req, res) => {
     const savedResource = await newResource.save();
 
     // Increment the totalUploaded count for the user
-    user.totalUploaded += 1; // Assuming the totalUploaded field should be incremented
+    user.totalUploaded += 0; // Assuming the totalUploaded field should be incremented
     await user.save();
 
     // Notification logic for all resources
