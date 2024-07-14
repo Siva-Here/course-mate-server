@@ -260,6 +260,44 @@ const updateDocument = async (req, res) => {
   }
 };
 
+// const deleteDocument = async (req, res) => {
+//   const { docId } = req.body;
+//   try {
+//     const document = await Document.findById(docId);
+//     if (!document) {
+//       return res.status(404).json({ message: "Document not found" });
+//     }
+
+//     const parentFolder = await Folder.findById(document.parentFolder);
+//     if (parentFolder) {
+//       parentFolder.contents = parentFolder.contents.filter(
+//         (id) => id.toString() !== docId
+//       );
+//       await parentFolder.save();
+//     }
+
+//     const user = await User.findById(document.uploadedBy);
+//     if (user) {
+//       user.totalUploaded -= 0;
+//       user.uploadedDocs = user.uploadedDocs.filter(
+//         (id) => id.toString() !== docId
+//       );
+//       await user.save();
+//     }
+
+//     // Delete the file from Google Drive
+//     await deleteFile(document.fileId);
+
+//     // Delete the document from the database
+//     await Document.findByIdAndDelete(docId);
+
+//     res.status(200).json({ message: "Document deleted successfully" });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 const deleteDocument = async (req, res) => {
   const { docId } = req.body;
   try {
@@ -270,6 +308,14 @@ const deleteDocument = async (req, res) => {
 
     const parentFolder = await Folder.findById(document.parentFolder);
     if (parentFolder) {
+      // Ensure all required fields are set
+      if (parentFolder.isSubject === undefined) {
+        parentFolder.isSubject = false; // or set to an appropriate default value
+      }
+      if (parentFolder.isSem === undefined) {
+        parentFolder.isSem = false; // or set to an appropriate default value
+      }
+
       parentFolder.contents = parentFolder.contents.filter(
         (id) => id.toString() !== docId
       );
@@ -278,7 +324,7 @@ const deleteDocument = async (req, res) => {
 
     const user = await User.findById(document.uploadedBy);
     if (user) {
-      user.totalUploaded -= 0;
+      user.totalUploaded -= 1; // Decrease total uploaded count
       user.uploadedDocs = user.uploadedDocs.filter(
         (id) => id.toString() !== docId
       );
