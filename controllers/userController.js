@@ -1,5 +1,6 @@
 const User = require("../model/User");
 const Document = require("../model/Document");
+const {sendFcmMessage}=require("../firebase/sendNotification");
 
 const login = async (req, res) => {
   try {
@@ -20,6 +21,13 @@ const login = async (req, res) => {
       // Update token for the existing user
       existingUser.token = token;
       await existingUser.save();
+      const bool=await sendFcmMessage([existingUser.token],"Welcome To CoursMate","From Team CoursMate");
+      if(bool){
+        console.log("Welcome To CoursMate "+existingUser.username);
+      }
+      else{
+        console.log("notification not sent to "+existingUser.username);
+      }
       return res
         .status(200)
         .json({
