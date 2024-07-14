@@ -172,7 +172,6 @@ const deleteFile = async (fileId) => {
   }
 };
 
-
 const saveDocument = async (req, res) => {
   const { fileId, name, viewLink, downloadLink, parentFolder, uploadedBy } = req.body;
   const bearerHeader = req.headers['authorization'];
@@ -182,7 +181,7 @@ const saveDocument = async (req, res) => {
   }
 
   const bearerToken = bearerHeader.split(' ')[1];
-  
+
   if (!fileId || !name || !viewLink || !downloadLink || !parentFolder || !uploadedBy) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -190,7 +189,7 @@ const saveDocument = async (req, res) => {
   try {
     const decodedToken = jwtDecode(bearerToken);
     const user = await User.findById(uploadedBy);
-    
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -214,6 +213,35 @@ const saveDocument = async (req, res) => {
 
     const savedDocument = await newDocument.save();
 
+    // Retrieve the parent folder
+    const parentFolderDoc = await Folder.findById(savedDocument.parentFolder);
+    if (!parentFolderDoc) {
+      return res.status(404).json({ message: "Parent folder not found" });
+    }
+
+    let body = `Document uploaded in ${parentFolderDoc.name}`;
+    // Retrieve the parent of the parent folder (grandparent folder)
+    const grandParentFolder = await Folder.findById(parentFolderDoc.parentFolder);
+    if (grandParentFolder) {
+      body += `, under ${grandParentFolder.name} to be acccepted`;
+    } else {
+      body += ' in GATE';
+    }
+
+    // Use both parent and grandparent folder names in the notification body
+    const title = newDocument.name;
+
+    // Send notification to all admin users
+    const adminUsers = await User.find({ isAdmin: true, token: { $exists: true, $ne: null } });
+    const tokens = adminUsers.map(admin => admin.token);
+    const success = await sendFcmMessage(tokens, title, body);
+
+    if (success) {
+      console.log("Notification sent successfully");
+    } else {
+      console.log("Failed to send some notifications");
+    }
+
     return res.status(201).json({
       message: "Document saved successfully",
       document: savedDocument
@@ -223,6 +251,7 @@ const saveDocument = async (req, res) => {
     return res.status(500).json({ error: "Failed to save the document" });
   }
 };
+
 
 
 const getDocumentById = async (req, res) => {
@@ -259,44 +288,6 @@ const updateDocument = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-// const deleteDocument = async (req, res) => {
-//   const { docId } = req.body;
-//   try {
-//     const document = await Document.findById(docId);
-//     if (!document) {
-//       return res.status(404).json({ message: "Document not found" });
-//     }
-
-//     const parentFolder = await Folder.findById(document.parentFolder);
-//     if (parentFolder) {
-//       parentFolder.contents = parentFolder.contents.filter(
-//         (id) => id.toString() !== docId
-//       );
-//       await parentFolder.save();
-//     }
-
-//     const user = await User.findById(document.uploadedBy);
-//     if (user) {
-//       user.totalUploaded -= 0;
-//       user.uploadedDocs = user.uploadedDocs.filter(
-//         (id) => id.toString() !== docId
-//       );
-//       await user.save();
-//     }
-
-//     // Delete the file from Google Drive
-//     await deleteFile(document.fileId);
-
-//     // Delete the document from the database
-//     await Document.findByIdAndDelete(docId);
-
-//     res.status(200).json({ message: "Document deleted successfully" });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 const deleteDocument = async (req, res) => {
   const { docId } = req.body;

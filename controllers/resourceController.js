@@ -39,11 +39,11 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 //         return res.status(404).json({ message: 'User not found' });
 //       }
 
-
 //       const folder = await Folder.findById(folderId);
 //       if (!folder) {
 //         return res.status(404).json({ message: 'Folder not found' });
 //       }
+
 //       const newResource = new Resource({
 //         name,
 //         description,
@@ -51,44 +51,48 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 //         uploadedBy: user._id,
 //         parentFolder: folder._id,
 //         byAdmin: user.isAdmin,
+//         isAccepted:folder.name=="placements",
 //         isPlacement: folder.name == "placements"
 //       });
 //       const savedResource = await newResource.save();
-      
+
 //       // Increment the totalUploaded count for the user
-//       user.totalUploaded += 0;
+//       user.totalUploaded += 1; // You had user.totalUploaded += 0, changed to += 1 assuming it's a typo
 //       await user.save();
-      
+
+//       // Send notification if it's a placement resource
 //       if (folder.name == "placements") {
 //         const title = name;
-//         let body = `${name} brochure uploaded in placements`;
+//         const body = `${name} brochure uploaded in placements`;
 
 //         // Send notification to all users with valid tokens
 //         const users = await User.find({ token: { $exists: true, $ne: null } });
-//         // Extract tokens from users
 //         const tokens = users.map(user => user.token);
 
 //         // Send FCM message with tokens array
 //         const notificationResult = await sendFcmMessage(tokens, title, body);
 
 //         if (notificationResult) {
-//           res.status(200).send({ message: "Notification sent successfully" });
+//           return res.status(200).json({ message: "Notification sent successfully" });
 //         } else {
-//           res.status(500).send({ message: "Failed to send notifications" });
+//           return res.status(500).json({ message: "Failed to send notifications" });
 //         }
 //       }
-//       res.status(201).json(savedResource);
+
+//       return res.status(201).json(savedResource);
 //     } catch (error) {
 //       console.error(error);
-//       res.status(500).json({ message: 'Server error' });
+//       return res.status(500).json({ message: 'Server error' });
 //     }
 //   } else {
-//     res.status(403).json({ message: "Forbidden" });
+//     return res.status(403).json({ message: "Forbidden" });
 //   }
 // };
 
+
 const createResource = async (req, res) => {
   const { name, description, rscLink, folderId, userId } = req.body;
+  const {email} = req.userdata;
 
   // Validate folderId and userId
   if (!isValidObjectId(folderId)) {
@@ -99,73 +103,90 @@ const createResource = async (req, res) => {
   }
 
   const bearerHeader = req.headers['authorization'];
-  if (typeof bearerHeader !== 'undefined') {
-    const bearerToken = bearerHeader.split(' ')[1];
-    try {
-      const decodedToken = jwtDecode(bearerToken);
-      const user = await User.findById(userId);
-      if (!(decodedToken.email === user.email)) {
-        return res.status(401).json({ message: "User Not Allowed!!!" });
-      }
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
+  if (!bearerHeader) {
+    return res.status(403).json({ message: "Authorization token is required" });
+  }
+
+  const bearerToken = bearerHeader.split(' ')[1];
+
+  try {
+    const decodedToken = jwtDecode(bearerToken);
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    try {
-      const user = await User.findById(userId);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
-      }
-
-      const folder = await Folder.findById(folderId);
-      if (!folder) {
-        return res.status(404).json({ message: 'Folder not found' });
-      }
-
-      const newResource = new Resource({
-        name,
-        description,
-        rscLink,
-        uploadedBy: user._id,
-        parentFolder: folder._id,
-        byAdmin: user.isAdmin,
-        isPlacement: folder.name == "placements"
-      });
-      const savedResource = await newResource.save();
-
-      // Increment the totalUploaded count for the user
-      user.totalUploaded += 1; // You had user.totalUploaded += 0, changed to += 1 assuming it's a typo
-      await user.save();
-
-      // Send notification if it's a placement resource
-      if (folder.name == "placements") {
-        const title = name;
-        const body = `${name} brochure uploaded in placements`;
-
-        // Send notification to all users with valid tokens
-        const users = await User.find({ token: { $exists: true, $ne: null } });
-        const tokens = users.map(user => user.token);
-
-        // Send FCM message with tokens array
-        const notificationResult = await sendFcmMessage(tokens, title, body);
-
-        if (notificationResult) {
-          return res.status(200).json({ message: "Notification sent successfully" });
-        } else {
-          return res.status(500).json({ message: "Failed to send notifications" });
-        }
-      }
-
-      return res.status(201).json(savedResource);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Server error' });
+    if (decodedToken.email !== user.email) {
+      return res.status(401).json({ message: "User Not Allowed!!!" });
     }
-  } else {
-    return res.status(403).json({ message: "Forbidden" });
+
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      return res.status(404).json({ message: 'Folder not found' });
+    }
+
+    const authPlacement = (process.env.ADMIN_EMAILS.split(",").includes(email)) || (process.env.PLACEMENT_EMAILS.split(",").includes(email));
+    const newResource = new Resource({
+      name,
+      description,
+      rscLink,
+      uploadedBy: user._id,
+      parentFolder: folder._id,
+      byAdmin: user.isAdmin,
+      isAccepted: folder.name === "placements" && (authPlacement),
+      isPlacement: folder.name === "placements" && (authPlacement)
+    });
+
+    const savedResource = await newResource.save();
+
+    // Increment the totalUploaded count for the user
+    user.totalUploaded += 1; // Assuming the totalUploaded field should be incremented
+    await user.save();
+
+    // Notification logic for all resources
+    const title = newResource.name;
+    const body = `Resource "${newResource.name}" uploaded in ${folder.name} folder to be accepted`;
+
+    // Send notification to all admin users
+    const adminUsers = await User.find({ isAdmin: true, token: { $exists: true, $ne: null } });
+    const adminTokens = adminUsers.map(admin => admin.token);
+
+    const adminNotificationResult = await sendFcmMessage(adminTokens, title, body);
+
+    if (adminNotificationResult) {
+      console.log("Admin notification sent successfully");
+    } else {
+      console.log("Failed to send admin notifications");
+    }
+
+    // Additional notification logic for placement resources
+    if (folder.name === "placements") {
+      if((!process.env.ADMIN_EMAILS.split(",").includes(email)) || (!process.env.PLACEMENT_EMAILS.split(",").includes(email))){
+        return res.status(401).json({message: "Unauthorized to add a placement"});
+      }
+      const placementTitle = name;
+      const placementBody = `${name} brochure uploaded in placements`;
+
+      const users = await User.find({ token: { $exists: true, $ne: null } });
+      const userTokens = users.map(user => user.token);
+
+      const placementNotificationResult = await sendFcmMessage(userTokens, placementTitle, placementBody);
+
+      if (placementNotificationResult) {
+        console.log("Placement notifications sent successfully");
+      } else {
+        console.log("Failed to send placement notifications");
+      }
+    }
+
+    return res.status(201).json(savedResource);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 const getResourceById = async (req, res) => {
