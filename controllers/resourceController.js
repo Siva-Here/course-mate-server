@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 const { jwtDecode } = require('jwt-decode');
 const { sendFcmMessage } = require('../firebase/sendNotification');
 
-
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 const createResource = async (req, res) => {
