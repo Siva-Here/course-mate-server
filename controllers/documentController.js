@@ -408,7 +408,7 @@ const acceptDocument = async (req, res) => {
     if (success) {
       res.status(200).send({ message: "Notification sent successfully" });
     } else {
-      res.status(500).send({ message: "Failed to send some notifications" });
+      res.status(200).send({ message: "Failed to send some notifications" });
     }
 
   } catch (err) {
