@@ -291,7 +291,7 @@ const acceptResource = async (req, res) => {
     if (notificationResult) {
       res.status(200).send({ message: "Notification sent successfully" });
     } else {
-      res.status(500).send({ message: "Failed to send notifications" });
+      res.status(200).send({ message: "Failed to send notifications" });
     }
 
   } catch (err) {
