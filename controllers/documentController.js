@@ -2,6 +2,7 @@ const User = require("../model/User");
 const Document = require("../model/Document");
 const Comment = require("../model/Comment");
 const Folder = require("../model/Folder");
+const Token =require("../model/Token");
 const { google } = require("googleapis");
 const path = require("path");
 const fs = require("fs");
@@ -12,11 +13,23 @@ const { JWT } = require('google-auth-library');
 const axios=require('axios');
 const {sendFcmMessage} = require('../firebase/sendNotification');
 require("dotenv").config();
+ 
+const getRefreshTokenFromDb = async () => {
+  try {
+    const tokenDoc = await Token.findOne({}).exec();
+    console.log(tokenDoc.refreshToken);
+    return tokenDoc ? tokenDoc.refreshToken : null;
+  } catch (error) {
+    console.error("Error retrieving refresh token from database:", error);
+    throw error;
+  }
+};
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
-const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+
+// const REFRESH_TOKEN =getRefreshTokenFromDb() || process.env.REFRESH_TOKEN;
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -24,7 +37,17 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
-oauth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+
+const setupOAuthClient = async () => {
+  const refreshToken = await getRefreshTokenFromDb();
+  if (refreshToken) {
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
+  } else {
+    console.error("No refresh token found in the database.");
+  }
+};
+
+setupOAuthClient();
 
 const drive = google.drive({
   version: "v3",
@@ -449,7 +472,6 @@ const getDocs = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 module.exports = {
   uploadDocument,

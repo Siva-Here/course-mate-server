@@ -93,7 +93,7 @@ const createResource = async (req, res) => {
       if (placementNotificationResult) {
         console.log("Placement notifications sent successfully");
       } else {
-        console.log("Failed to send placement notifications");
+        console.log("Failed to send some placement notifications");
       }
     }
 
