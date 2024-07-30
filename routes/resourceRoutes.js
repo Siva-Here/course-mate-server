@@ -8,6 +8,7 @@ const {
   getResourcesByUser,
   getAllResource,
   acceptResource,
+  createPost,
 } = require("../controllers/resourceController");
 const auth = require("../middlewares/auth");
 const authAdmin = require("../middlewares/authAdmin");
@@ -21,5 +22,6 @@ router.post("/create",auth, createResource);
 router.delete("/",authAdmin,deleteResource); 
 // router.post("/folder",auth,getResourcesByFolder);
 // router.post("/user",auth,getResourcesByUser);
+router.post("/addPost",auth,createPost);
 
 module.exports = router;

@@ -45,9 +45,9 @@ const createResource = async (req, res) => {
 
     const authPlacement = (process.env.ADMIN_EMAILS.split(",").includes(email)) || (process.env.PLACEMENT_EMAILS.split(",").includes(email));
     const newResource = new Resource({
-      name,
-      description,
-      rscLink,
+      name:name.trim(),
+      description:description.trim(),
+      rscLink:rscLink.trim(),
       uploadedBy: user._id,
       parentFolder: folder._id,
       byAdmin: user.isAdmin,
@@ -301,4 +301,64 @@ const acceptResource = async (req, res) => {
 };
 
 
-module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser, getAllResource, acceptResource };
+const createPost = async (req, res) => {
+  const { name, description, posts, uploadedBy, parentFolder, rscLink } = req.body;
+
+  if (!Array.isArray(posts) || posts.length === 0 || posts.includes('')) {
+    return res.status(400).json({ message: 'Invalid posts provided' });
+  }
+
+  // Validate uploadedBy and parentFolder
+  if (!isValidObjectId(uploadedBy)) {
+    return res.status(400).json({ message: 'Invalid uploadedBy' });
+  }
+  if (!isValidObjectId(parentFolder)) {
+    return res.status(400).json({ message: 'Invalid parentFolder' });
+  }
+
+  const bearerHeader = req.headers['authorization'];
+  if (!bearerHeader) {
+    return res.status(403).json({ message: "Authorization token is required" });
+  }
+
+  const bearerToken = bearerHeader.split(' ')[1];
+
+  try {
+    const decodedToken = jwtDecode(bearerToken);
+    const user = await User.findById(uploadedBy);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (decodedToken.email !== user.email) {
+      return res.status(401).json({ message: "User Not Allowed!!!" });
+    }
+
+    const folder = await Folder.findById(parentFolder);
+    if (!folder) {
+      return res.status(404).json({ message: 'Folder not found' });
+    }
+
+    const newResource = new Resource({
+      name:name.trim(),
+      description:description.trim(),
+      rscLink: rscLink.trim() || null,
+      uploadedBy: user._id,
+      parentFolder: folder._id,
+      posts: posts,
+      isPost: true,
+      isPlacement: true,
+    });
+
+    const savedResource = await newResource.save();
+
+    return res.status(201).json(savedResource);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+module.exports = { createResource, getResourceById, updateResource, deleteResource, getResourcesByFolder, getResourcesByUser, getAllResource, acceptResource,createPost};
