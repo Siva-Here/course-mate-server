@@ -51,8 +51,8 @@ const createResource = async (req, res) => {
       uploadedBy: user._id,
       parentFolder: folder._id,
       byAdmin: user.isAdmin,
-      isAccepted: folder.name === "placements" && authPlacement,
-      isPlacement: folder.name === "placements" && authPlacement
+      isAccepted: (folder.name === "placements"  || folder.name==="Job Updates") && authPlacement,
+      isPlacement: (folder.name === "placements"  || folder.name==="Job Updates") && authPlacement
     });
 
     const savedResource = await newResource.save();
@@ -336,7 +336,7 @@ const createPost = async (req, res) => {
     }
 
     const folder = await Folder.findById(parentFolder);
-    if (!folder) {
+    if (!folder && folder.name==="Posts") {
       return res.status(404).json({ message: 'Folder not found' });
     }
 
