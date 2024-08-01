@@ -8,10 +8,10 @@ const { sendFcmMessage } = require('../firebase/sendNotification');
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 const createResource = async (req, res) => {
-  const { name, description, rscLink, folderId, userId } = req.body;
+  const { name, description, rscLink, folderId, userId,isJobUpdate } = req.body;
   const {email} = req.userdata;
 
-  // Validate folderId and userId
+  // Validate folderId and userId 
   if (!isValidObjectId(folderId)) {
     return res.status(400).json({ message: 'Invalid folderId' });
   }
@@ -49,6 +49,7 @@ const createResource = async (req, res) => {
       description:description.trim(),
       rscLink:rscLink.trim(),
       uploadedBy: user._id,
+      isJobUpdate:isJobUpdate,
       parentFolder: folder._id,
       byAdmin: user.isAdmin,
       isAccepted: (folder.name === "placements"  || folder.name==="Job Updates") && authPlacement,

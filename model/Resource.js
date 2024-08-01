@@ -26,6 +26,11 @@ const resourceSchema = new Schema({
     required:false,
     default:[],
   },
+  isJobUpdate:{
+    type:Boolean,
+    required:true,
+    default:false,
+  },
 });
 
 
