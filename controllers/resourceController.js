@@ -349,7 +349,7 @@ const createPost = async (req, res) => {
       parentFolder: folder._id,
       posts: posts,
       isPost: true,
-      isPlacement: true,
+      isPlacement: false,
     });
 
     const savedResource = await newResource.save();
