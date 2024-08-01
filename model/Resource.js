@@ -28,8 +28,7 @@ const resourceSchema = new Schema({
   },
   isJobUpdate:{
     type:Boolean,
-    required:true,
-    default:false,
+    default:false
   },
 });
 
